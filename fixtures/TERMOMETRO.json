@@ -1,0 +1,132 @@
+[
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T18:00:00Z",
+    "Value": 13
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T18:30:00Z",
+    "Value": 11.7
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T19:00:00Z",
+    "Value": 10.900001
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T19:30:00Z",
+    "Value": 10.5
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T20:00:00Z",
+    "Value": 9.400001
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T20:30:00Z",
+    "Value": 9.2
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T21:00:00Z",
+    "Value": 9.1
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T21:30:00Z",
+    "Value": 9
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T22:00:00Z",
+    "Value": 9
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T22:30:00Z",
+    "Value": 8.6
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T23:00:00Z",
+    "Value": 8.7
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-30T23:30:00Z",
+    "Value": 8.400001
+  },
+  {
+    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "At": "2020-03-31T00:00:00Z",
+    "Value": 8.2
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T18:00:00Z",
+    "Value": 6.8
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T18:30:00Z",
+    "Value": 6.5
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T19:00:00Z",
+    "Value": 5.9
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T19:30:00Z",
+    "Value": 5.7000003
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T20:00:00Z",
+    "Value": 5.8
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T20:30:00Z",
+    "Value": 5.8
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T21:00:00Z",
+    "Value": 5.8
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T21:30:00Z",
+    "Value": 5.6
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T22:00:00Z",
+    "Value": 5.7000003
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T22:30:00Z",
+    "Value": 5.5
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T23:00:00Z",
+    "Value": 5.4
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-30T23:30:00Z",
+    "Value": 5.1
+  },
+  {
+    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "At": "2020-03-31T00:00:00Z",
+    "Value": 4.9
+  }
+]
