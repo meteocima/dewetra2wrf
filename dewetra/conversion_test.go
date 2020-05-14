@@ -1,7 +1,7 @@
 package dewetra
 
 import (
-	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,8 +16,7 @@ func TestConvertToAscii(t *testing.T) {
 	temperature := getResultsFile(t, "TERMOMETRO.json")
 	results, err := matchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 	assert.NoError(t, err)
-	resultsBuff, err := json.MarshalIndent(results, " ", " ")
-	assert.NoError(t, err)
-	//fmt.Println(string(resultsBuff))
-	_ = resultsBuff
+	s := ToWRFDA(results[0])
+	fmt.Println(s)
+	assert.Equal(t, "err", s)
 }

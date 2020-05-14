@@ -28,15 +28,21 @@ func skipLines(reader *bufio.Reader, n int) {
 }
 
 func str(s string, len int) string {
-	strFmt := fmt.Sprintf("%%%ds", len)
+	strFmt := fmt.Sprintf("%%-%ds", len)
 	return fmt.Sprintf(strFmt, s)
 }
 
 func integer(i int, len int) string {
-	return str(fmt.Sprintf("%d", i), len)
+	intS := fmt.Sprintf("%d", i)
+	strFmt := fmt.Sprintf("%%%ds", len)
+	return fmt.Sprintf(strFmt, intS)
 }
 
 func num(f SensorData, len float64) string {
+	if f.IsNaN() {
+		f = -888888.0
+	}
+
 	strFmt := fmt.Sprintf("%% %sf", strconv.FormatFloat(float64(len), 'f', -1, 64))
 	return fmt.Sprintf(strFmt, f)
 }
@@ -55,41 +61,56 @@ func dataQCError(data string) string {
 		num(ERROR, 7.2)
 }
 
-func printObservation(obs Observation) {
-	name := "SAME"
+func dataQCError3(data string) string {
+	return data +
+		integer(QC, 4) +
+		num(ERROR, 7.3)
+}
+
+//INFO  = PLATFORM, DATE, NAME, LEVELS, LATITUDE, LONGITUDE, ELEVATION, ID.
+//SRFC  = SLP, PW (DATA,QC,ERROR).
+//EACH  = PRES, SPEED, DIR, HEIGHT, TEMP, DEW PT, HUMID (DATA,QC,ERROR)*LEVELS.
+//INFO_FMT = (A12,1X,A19,1X,A40,1X,I6,3(F12.3,11X),6X,A40)
+//SRFC_FMT = (F12.3,I4,F7.2,F12.3,I4,F7.3)
+//EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))
+
+// PrintObservation is
+func ToWRFDA(obs Observation) string {
 	elevation := 0.0
-	fmt.Println(
-		str("FM-12 SYNOP", 12),
-		" ",
-		date(obs.ObsTimeUtc),
-		" ",
-		str(name, 40),
-		" ",
-		integer(1, 6),
-		" ",
-		num(SensorData(obs.Lat), 12.3),
-		space(11),
-		num(SensorData(obs.Lon), 12.3),
-		space(11),
-		num(SensorData(elevation), 12.3),
-		space(11),
-		space(6),
-		str(obs.StationID, 40),
-	)
+	firstLine :=
+		str("FM-12 SYNOP", 12) +
+			" " +
+			date(obs.ObsTimeUtc) +
+			" " +
+			str(obs.StationName, 40) +
+			" " +
+			integer(1, 6) +
+			num(SensorData(obs.Lat), 12.3) +
+			space(11) +
+			num(SensorData(obs.Lon), 12.3) +
+			space(11) +
+			num(SensorData(elevation), 12.3) +
+			space(11) +
+			space(6) +
+			str(obs.StationID, 40)
 
 	surfaceLevelPressure := SensorData(0.0)
-	fmt.Println(
-		dataQCError(num(surfaceLevelPressure, 12.3)),
-		dataQCError(num(obs.Metric.PrecipTotal, 12.3)),
-	)
+	secondLine :=
+		dataQCError(num(surfaceLevelPressure, 12.3)) +
+			dataQCError3(num(obs.Metric.PrecipTotal, 12.3))
 
-	fmt.Println(
-		dataQCError(num(obs.Metric.Pressure, 12.3)),
-		dataQCError(num(obs.Metric.WindspeedAvg, 12.3)),
-		dataQCError(num(obs.WinddirAvg, 12.3)),
-		dataQCError(num(SensorData(elevation), 12.3)),
-		dataQCError(num(obs.Metric.TempAvg, 12.3)),
-		dataQCError(num(obs.Metric.DewptAvg, 12.3)),
-		dataQCError(num(obs.HumidityAvg, 12.3)),
-	)
+	thirstLine :=
+		dataQCError(num(obs.Metric.Pressure, 12.3)) +
+			dataQCError(num(obs.Metric.WindspeedAvg, 12.3)) +
+			dataQCError(num(obs.WinddirAvg, 12.3)) +
+			space(11) +
+			dataQCError(num(SensorData(elevation), 12.3)) +
+			dataQCError(num(obs.Metric.TempAvg, 12.3)) +
+			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
+			space(11) +
+			dataQCError(num(obs.HumidityAvg, 12.3)) +
+			dataQCError(num(0.0, 12.3)) +
+			dataQCError(num(0.0, 12.3))
+
+	return firstLine + "\n" + secondLine + "\n" + thirstLine
 }

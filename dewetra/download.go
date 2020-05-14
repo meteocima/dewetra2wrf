@@ -79,6 +79,11 @@ func (data SensorData) AsFloat() float64 {
 	return float64(data)
 }
 
+// IsNaN is
+func (data SensorData) IsNaN() bool {
+	return math.IsNaN(float64(data))
+}
+
 // MarshalJSON is
 func (data SensorData) MarshalJSON() ([]byte, error) {
 	if math.IsNaN(float64(data)) {
