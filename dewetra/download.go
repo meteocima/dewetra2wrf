@@ -45,9 +45,10 @@ type sensorReqBody struct {
 
 // SensorResult represent a sensor value at a point in time
 type SensorResult struct {
-	SensorID string
-	At       time.Time
-	Value    float64
+	SortKey string
+	At      time.Time
+	Value   float64
+	ID      string
 }
 
 // SensorValue is
@@ -73,12 +74,32 @@ type sensorAnag struct {
 // SensorData is
 type SensorData float64
 
+// AsFloat is
+func (data SensorData) AsFloat() float64 {
+	return float64(data)
+}
+
 // MarshalJSON is
 func (data SensorData) MarshalJSON() ([]byte, error) {
 	if math.IsNaN(float64(data)) {
 		return []byte("\"NaN\""), nil
 	}
 	return []byte(strconv.FormatFloat(float64(data), 'f', 5, 64)), nil
+}
+
+// UnmarshalJSON is
+func (data *SensorData) UnmarshalJSON(buff []byte) error {
+	buffS := string(buff)
+	if buffS == "\"NaN\"" {
+		*data = SensorData(math.NaN())
+		return nil
+	}
+	val, err := strconv.ParseFloat(buffS, 64)
+	if err != nil {
+		return err
+	}
+	*data = SensorData(val)
+	return nil
 }
 
 // ObservationMetric is
@@ -94,6 +115,7 @@ type ObservationMetric struct {
 // a station at a moment in time
 type Observation struct {
 	StationID   string
+	StationName string
 	ObsTimeUtc  time.Time
 	Lat, Lon    float64
 	HumidityAvg SensorData
@@ -101,15 +123,22 @@ type Observation struct {
 	Metric      ObservationMetric
 }
 
+func (obs Observation) SortKey() string {
+	s := fmt.Sprintf("%s:%05f:%05f", obs.StationName, obs.Lat, obs.Lon)
+	fmt.Println(s)
+	return s
+
+}
+
 func observationIsLess(this, that SensorResult) bool {
-	if this.SensorID == that.SensorID {
+	if this.SortKey == that.SortKey {
 		return this.At.Unix() < that.At.Unix()
 	}
-	return this.SensorID < that.SensorID
+	return this.SortKey < that.SortKey
 }
 
 func minObservation(results ...SensorResult) SensorResult {
-	min := SensorResult{SensorID: "ZZZZZZZZZZZZZZZZZZZZZZZZZ"}
+	min := SensorResult{SortKey: "ZZZZZZZZZZZZZZZZZZZZZZZZZ"}
 	for _, result := range results {
 		if observationIsLess(result, min) {
 			min = result
@@ -174,59 +203,60 @@ func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection,
 		if len(pressure) > pressureIdx {
 			pressureItem = pressure[pressureIdx]
 		} else {
-			pressureItem.SensorID = "ZZZZZZZZZZ"
+			pressureItem.SortKey = "ZZZZZZZZZZ"
 		}
 
 		var relativeHumidityItem SensorResult
 		if len(relativeHumidity) > relativeHumidityIdx {
 			relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
 		} else {
-			relativeHumidityItem.SensorID = "ZZZZZZZZZZ"
+			relativeHumidityItem.SortKey = "ZZZZZZZZZZ"
 		}
 
 		var temperatureItem SensorResult
 		if len(temperature) > temperatureIdx {
 			temperatureItem = temperature[temperatureIdx]
 		} else {
-			temperatureItem.SensorID = "ZZZZZZZZZZ"
+			temperatureItem.SortKey = "ZZZZZZZZZZ"
 		}
 
 		var windDirectionItem SensorResult
 		if len(windDirection) > windDirectionIdx {
 			windDirectionItem = windDirection[windDirectionIdx]
 		} else {
-			windDirectionItem.SensorID = "ZZZZZZZZZZ"
+			windDirectionItem.SortKey = "ZZZZZZZZZZ"
 		}
 
 		var windSpeedItem SensorResult
 		if len(windSpeed) > windSpeedIdx {
 			windSpeedItem = windSpeed[windSpeedIdx]
 		} else {
-			windSpeedItem.SensorID = "ZZZZZZZZZZ"
+			windSpeedItem.SortKey = "ZZZZZZZZZZ"
 		}
 
 		var precipitableWaterItem SensorResult
 		if len(precipitableWater) > precipitableWaterIdx {
 			precipitableWaterItem = precipitableWater[precipitableWaterIdx]
 		} else {
-			precipitableWaterItem.SensorID = "ZZZZZZZZZZ"
+			precipitableWaterItem.SortKey = "ZZZZZZZZZZ"
 		}
 
-		if relativeHumidityItem.SensorID == "ZZZZZZZZZZ" &&
-			temperatureItem.SensorID == "ZZZZZZZZZZ" &&
-			windDirectionItem.SensorID == "ZZZZZZZZZZ" &&
-			windSpeedItem.SensorID == "ZZZZZZZZZZ" &&
-			precipitableWaterItem.SensorID == "ZZZZZZZZZZ" &&
-			pressureItem.SensorID == "ZZZZZZZZZZ" {
+		if relativeHumidityItem.SortKey == "ZZZZZZZZZZ" &&
+			temperatureItem.SortKey == "ZZZZZZZZZZ" &&
+			windDirectionItem.SortKey == "ZZZZZZZZZZ" &&
+			windSpeedItem.SortKey == "ZZZZZZZZZZ" &&
+			precipitableWaterItem.SortKey == "ZZZZZZZZZZ" &&
+			pressureItem.SortKey == "ZZZZZZZZZZ" {
 			break
 		}
 
 		minItem := minObservation(pressureItem, relativeHumidityItem, temperatureItem, windDirectionItem, windSpeedItem, precipitableWaterItem)
-		station := sensorsTable[minItem.SensorID]
+		station := sensorsTable[minItem.ID]
 
 		currentObs := Observation{
 			ObsTimeUtc:  minItem.At,
-			StationID:   minItem.SensorID,
+			StationID:   station.ID,
+			StationName: station.StationName,
 			Lat:         station.Lat,
 			Lon:         station.Lon,
 			HumidityAvg: SensorData(math.NaN()),
@@ -240,32 +270,32 @@ func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection,
 			},
 		}
 
-		if relativeHumidityItem.SensorID == currentObs.StationID && currentObs.ObsTimeUtc.Equal(relativeHumidityItem.At) {
+		if relativeHumidityItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(relativeHumidityItem.At) {
 			currentObs.HumidityAvg = relativeHumidityItem.SensorValue()
 			relativeHumidityIdx++
 		}
 
-		if temperatureItem.SensorID == currentObs.StationID && currentObs.ObsTimeUtc.Equal(temperatureItem.At) {
+		if temperatureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(temperatureItem.At) {
 			currentObs.Metric.TempAvg = temperatureItem.SensorValue()
 			temperatureIdx++
 		}
 
-		if windDirectionItem.SensorID == currentObs.StationID && currentObs.ObsTimeUtc.Equal(windDirectionItem.At) {
+		if windDirectionItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windDirectionItem.At) {
 			currentObs.WinddirAvg = windDirectionItem.SensorValue()
 			windDirectionIdx++
 		}
 
-		if windSpeedItem.SensorID == currentObs.StationID && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
+		if windSpeedItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
 			currentObs.Metric.WindspeedAvg = windSpeedItem.SensorValue()
 			windSpeedIdx++
 		}
 
-		if precipitableWaterItem.SensorID == currentObs.StationID && currentObs.ObsTimeUtc.Equal(precipitableWaterItem.At) {
+		if precipitableWaterItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(precipitableWaterItem.At) {
 			currentObs.Metric.PrecipTotal = precipitableWaterItem.SensorValue()
 			precipitableWaterIdx++
 		}
 
-		if pressureItem.SensorID == currentObs.StationID && currentObs.ObsTimeUtc.Equal(pressureItem.At) {
+		if pressureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(pressureItem.At) {
 			currentObs.Metric.Pressure = precipitableWaterItem.SensorValue()
 			pressureIdx++
 		}
@@ -347,10 +377,10 @@ func downloadDewetraSensor(sensorClass string, ids []string, dateFrom, dateTo ti
 
 	sensorObservations := SensorsResult{}
 	observationLess := func(i, j int) bool {
-		if sensorObservations[i].SensorID == sensorObservations[j].SensorID {
+		if sensorObservations[i].SortKey == sensorObservations[j].SortKey {
 			return sensorObservations[i].At.Unix() < sensorObservations[j].At.Unix()
 		}
-		return sensorObservations[i].SensorID < sensorObservations[j].SensorID
+		return sensorObservations[i].SortKey < sensorObservations[j].SortKey
 	}
 
 	data := []sensorData{}
@@ -374,9 +404,10 @@ func downloadDewetraSensor(sensorClass string, ids []string, dateFrom, dateTo ti
 
 			sensAnag := sensorsTable[sensor.SensorID]
 			sensorObservations = append(sensorObservations, SensorResult{
-				At:       at,
-				Value:    sensor.Values[idx],
-				SensorID: fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon),
+				At:      at,
+				Value:   sensor.Values[idx],
+				SortKey: fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon),
+				ID:      sensor.SensorID,
 			})
 		}
 	}

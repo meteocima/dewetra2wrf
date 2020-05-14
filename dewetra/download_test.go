@@ -3,6 +3,7 @@ package dewetra
 import (
 	"encoding/json"
 	"io/ioutil"
+	"math"
 	"testing"
 	"time"
 
@@ -19,14 +20,6 @@ import (
 }
 */
 
-func mustParse(dateS string) time.Time {
-	dt, err := time.Parse("200601021504", dateS)
-	if err != nil {
-		panic(err)
-	}
-	return dt
-}
-
 func getResultsFile(t *testing.T, name string) SensorsResult {
 	fixturePath := testutil.FixtureDir(name)
 	buff, err := ioutil.ReadFile(fixturePath)
@@ -35,6 +28,14 @@ func getResultsFile(t *testing.T, name string) SensorsResult {
 	err = json.Unmarshal(buff, &expected)
 	assert.NoError(t, err)
 	return expected
+}
+
+func saveResultsFile(t *testing.T, name string, results interface{}) {
+	fixturePath := testutil.FixtureDir(name)
+	buff, err := json.Marshal(results)
+
+	err = ioutil.WriteFile(fixturePath, buff, 0644)
+	assert.NoError(t, err)
 }
 
 func TestDownloadPrecipitableWater(t *testing.T) {
@@ -108,8 +109,32 @@ func TestMatchDownloadedData(t *testing.T) {
 	temperature := getResultsFile(t, "TERMOMETRO.json")
 	results, err := matchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 	assert.NoError(t, err)
-	resultsBuff, err := json.MarshalIndent(results, " ", " ")
+
+	assert.Equal(t, 375, len(results))
+	assert.Equal(t, results[0].StationID, "210329130_2")
+	assert.Equal(t, results[0].StationName, "Foggia Istituto Agrario")
+	assert.Equal(t, results[0].ObsTimeUtc, testutil.MustParseISO("2020-03-30T18:00:00Z"))
+	assert.Equal(t, results[0].Lat, 41.469000)
+	assert.Equal(t, results[0].Lon, 15.483167)
+	assert.Equal(t, results[0].HumidityAvg, SensorData(75.00000))
+	assert.Equal(t, results[0].WinddirAvg, SensorData(292.00000))
+	assert.Equal(t, results[0].Metric.TempAvg, SensorData(13.00000))
+	assert.True(t, math.IsNaN(float64(results[0].Metric.DewptAvg)))
+	assert.Equal(t, results[0].Metric.WindspeedAvg, SensorData(0.60000))
+	assert.True(t, math.IsNaN(float64(results[0].Metric.Pressure)))
+	assert.Equal(t, results[0].Metric.PrecipTotal, SensorData(0.00000))
+
+}
+
+func TestSensorDataUnmarshalNaN(t *testing.T) {
+	buff, err := ioutil.ReadFile(testutil.FixtureDir("expected-download-results.json"))
 	assert.NoError(t, err)
+
+	var observations []Observation
+	err = json.Unmarshal(buff, &observations)
+	assert.NoError(t, err)
+
+	assert.True(t, math.IsNaN(observations[0].Metric.DewptAvg.AsFloat()))
 	//fmt.Println(string(resultsBuff))
-	_ = resultsBuff
+
 }

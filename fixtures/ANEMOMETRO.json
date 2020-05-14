@@ -1,132 +1,158 @@
 [
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T18:00:00Z",
-    "Value": 0.6
+    "Value": 0.6,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T18:30:00Z",
-    "Value": 1.6
+    "Value": 1.6,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T19:00:00Z",
-    "Value": 2
+    "Value": 2,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T19:30:00Z",
-    "Value": 1
+    "Value": 1,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T20:00:00Z",
-    "Value": 1.5
+    "Value": 1.5,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T20:30:00Z",
-    "Value": 0.90000004
+    "Value": 0.90000004,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T21:00:00Z",
-    "Value": 1.6
+    "Value": 1.6,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T21:30:00Z",
-    "Value": 1.4
+    "Value": 1.4,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T22:00:00Z",
-    "Value": 1.4
+    "Value": 1.4,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T22:30:00Z",
-    "Value": 1.7
+    "Value": 1.7,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T23:00:00Z",
-    "Value": 1.6
+    "Value": 1.6,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-30T23:30:00Z",
-    "Value": 1.7
+    "Value": 1.7,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Foggia Istituto Agrario:41.469000:15.483167",
+    "SortKey": "Foggia Istituto Agrario:41.469000:15.483167",
     "At": "2020-03-31T00:00:00Z",
-    "Value": 2.1000001
+    "Value": 2.1000001,
+    "ID": "210329129_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T18:00:00Z",
-    "Value": 10.8
+    "Value": 10.8,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T18:30:00Z",
-    "Value": 11.3
+    "Value": 11.3,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T19:00:00Z",
-    "Value": 11.6
+    "Value": 11.6,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T19:30:00Z",
-    "Value": 11
+    "Value": 11,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T20:00:00Z",
-    "Value": 10.8
+    "Value": 10.8,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T20:30:00Z",
-    "Value": 11.400001
+    "Value": 11.400001,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T21:00:00Z",
-    "Value": 10.8
+    "Value": 10.8,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T21:30:00Z",
-    "Value": 11.3
+    "Value": 11.3,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T22:00:00Z",
-    "Value": 9.6
+    "Value": 9.6,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T22:30:00Z",
-    "Value": 11.1
+    "Value": 11.1,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T23:00:00Z",
-    "Value": 10.6
+    "Value": 10.6,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-30T23:30:00Z",
-    "Value": 11.400001
+    "Value": 11.400001,
+    "ID": "39011_2"
   },
   {
-    "SensorID": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
+    "SortKey": "Trieste Meteo Istituto Nautico:45.647220:13.764444",
     "At": "2020-03-31T00:00:00Z",
-    "Value": 10.6
+    "Value": 10.6,
+    "ID": "39011_2"
   }
 ]
