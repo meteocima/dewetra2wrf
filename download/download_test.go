@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math"
+	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -87,6 +89,44 @@ func TestDownloadPressure(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, testutil.GetResultsFile(t, "BAROMETRO.json"), result)
 
+}
+
+func TestDownloadSensorsTable(t *testing.T) {
+	dataPath := testutil.FixtureDir("testanagr")
+	err := os.MkdirAll(dataPath, os.FileMode(0755))
+	assert.NoError(t, err)
+	assert.NoFileExists(t, path.Join(dataPath, "BAROMETRO.json"))
+	err = downloadSensorsTable(dataPath, sensor.DPCTrusted, "BAROMETRO")
+	assert.NoError(t, err)
+	assert.FileExists(t, path.Join(dataPath, "BAROMETRO.json"))
+
+	table, err := openSensorsMap(dataPath, "BAROMETRO")
+	assert.Greater(t, len(table), 30)
+
+	err = os.RemoveAll(dataPath)
+	assert.NoError(t, err)
+}
+
+func TestDownloadAllSensorsTables(t *testing.T) {
+	dataPath := testutil.FixtureDir("testanagr")
+	err := os.MkdirAll(dataPath, os.FileMode(0755))
+	assert.NoError(t, err)
+
+	err = downloadAllSensorsTables(dataPath, sensor.DPCTrusted)
+	assert.NoError(t, err)
+
+	assert.FileExists(t, path.Join(dataPath, "BAROMETRO.json"))
+	assert.FileExists(t, path.Join(dataPath, "PLUVIOMETRO.json"))
+	assert.FileExists(t, path.Join(dataPath, "IGROMETRO.json"))
+	assert.FileExists(t, path.Join(dataPath, "ANEMOMETRO.json"))
+	assert.FileExists(t, path.Join(dataPath, "DIREZIONEVENTO.json"))
+	assert.FileExists(t, path.Join(dataPath, "TERMOMETRO.json"))
+
+	table, err := openCompleteSensorsMap(dataPath)
+	assert.Greater(t, len(table), 30)
+
+	err = os.RemoveAll(dataPath)
+	assert.NoError(t, err)
 }
 
 func TestMatchDownloadedData(t *testing.T) {

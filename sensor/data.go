@@ -7,6 +7,31 @@ import (
 	"time"
 )
 
+// Collection is an enum that represents collections
+// of meteo stations (e.g. wunderground stations)
+type Collection int
+
+// Wunderground represents wunderground stations
+// DPCTrusted represents trusted italian stations
+const (
+	Wunderground Collection = iota
+	DPCTrusted
+)
+
+// Key return the key that identifies this collection
+// in DDS urls
+func (coll Collection) Key() string {
+	if coll == Wunderground {
+		return ""
+	}
+
+	if coll == DPCTrusted {
+		return "Dewetra%25Default"
+	}
+
+	panic("Unknown collection")
+}
+
 // Result represent a sensor value at a point in time
 type Result struct {
 	SortKey string

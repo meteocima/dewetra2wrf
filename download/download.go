@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"path"
 	"sort"
 	"time"
@@ -365,6 +366,70 @@ func fillSensorsMap(dataPath string, sensorClass string, sensorsTable map[string
 	}
 
 	return nil
+}
+
+func downloadAllSensorsTables(dataPath string, collection sensor.Collection) error {
+	err := downloadSensorsTable(dataPath, collection, "IGROMETRO")
+	if err != nil {
+		return err
+	}
+
+	err = downloadSensorsTable(dataPath, collection, "TERMOMETRO")
+	if err != nil {
+		return err
+	}
+
+	err = downloadSensorsTable(dataPath, collection, "DIREZIONEVENTO")
+	if err != nil {
+		return err
+	}
+
+	err = downloadSensorsTable(dataPath, collection, "ANEMOMETRO")
+	if err != nil {
+		return err
+	}
+
+	err = downloadSensorsTable(dataPath, collection, "PLUVIOMETRO")
+	if err != nil {
+		return err
+	}
+
+	err = downloadSensorsTable(dataPath, collection, "BAROMETRO")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func downloadSensorsTable(dataPath string, collection sensor.Collection, sensorClass string) error {
+	url := fmt.Sprintf("%s/drops_sensors/anag/%s/%s", baseURL, sensorClass, collection.Key())
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	req.SetBasicAuth(username, password)
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return fmt.Errorf("HTTP response %d", res.StatusCode)
+	}
+
+	content, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	filename := fmt.Sprintf("%s/%s.json", dataPath, sensorClass)
+	return ioutil.WriteFile(filename, content, os.FileMode(0644))
+
 }
 
 func openCompleteSensorsMap(dataPath string) (map[string]sensorAnag, error) {
