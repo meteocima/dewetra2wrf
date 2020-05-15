@@ -23,6 +23,7 @@ import (
 
 func TestDownloadPrecipitableWater(t *testing.T) {
 	result, err := downloadPrecipitableWater(
+		testutil.FixtureDir("anagr"),
 		[]string{"-2147444447_2", "268445238_2"},
 		time.Date(2020, 3, 30, 18, 0, 0, 0, time.UTC),
 		time.Date(2020, 3, 31, 0, 1, 0, 0, time.UTC),
@@ -33,6 +34,7 @@ func TestDownloadPrecipitableWater(t *testing.T) {
 
 func TestDownloadRelativeHumidity(t *testing.T) {
 	result, err := downloadRelativeHumidity(
+		testutil.FixtureDir("anagr"),
 		[]string{"210329130_2", "9784_2"},
 		time.Date(2020, 3, 30, 18, 0, 0, 0, time.UTC),
 		time.Date(2020, 3, 31, 0, 1, 0, 0, time.UTC),
@@ -43,6 +45,7 @@ func TestDownloadRelativeHumidity(t *testing.T) {
 
 func TestDownloadWindSpeed(t *testing.T) {
 	result, err := downloadWindSpeed(
+		testutil.FixtureDir("anagr"),
 		[]string{"210329129_2", "39011_2"},
 		time.Date(2020, 3, 30, 18, 0, 0, 0, time.UTC),
 		time.Date(2020, 3, 31, 0, 1, 0, 0, time.UTC),
@@ -54,6 +57,7 @@ func TestDownloadWindSpeed(t *testing.T) {
 
 func TestDownloadWindDirection(t *testing.T) {
 	result, err := downloadWindDirection(
+		testutil.FixtureDir("anagr"),
 		[]string{"210329131_2", "39010_2"},
 		time.Date(2020, 3, 30, 18, 0, 0, 0, time.UTC),
 		time.Date(2020, 3, 31, 0, 1, 0, 0, time.UTC),
@@ -64,6 +68,7 @@ func TestDownloadWindDirection(t *testing.T) {
 
 func TestDownloadTemperature(t *testing.T) {
 	result, err := downloadTemperature(
+		testutil.FixtureDir("anagr"),
 		[]string{"39202_2", "9781_2"},
 		time.Date(2020, 3, 30, 18, 0, 0, 0, time.UTC),
 		time.Date(2020, 3, 31, 0, 1, 0, 0, time.UTC),
@@ -74,6 +79,7 @@ func TestDownloadTemperature(t *testing.T) {
 
 func TestDownloadPressure(t *testing.T) {
 	result, err := downloadPressure(
+		testutil.FixtureDir("anagr"),
 		[]string{"9783_2", "7521_2"},
 		time.Date(2020, 3, 30, 18, 0, 0, 0, time.UTC),
 		time.Date(2020, 3, 31, 0, 1, 0, 0, time.UTC),
@@ -90,7 +96,7 @@ func TestMatchDownloadedData(t *testing.T) {
 	windSpeed := testutil.GetResultsFile(t, "ANEMOMETRO.json")
 	windDirection := testutil.GetResultsFile(t, "DIREZIONEVENTO.json")
 	temperature := testutil.GetResultsFile(t, "TERMOMETRO.json")
-	results, err := MatchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
+	results, err := MatchDownloadedData(testutil.FixtureDir("anagr"), pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 	assert.NoError(t, err)
 
 	assert.Equal(t, 375, len(results))
