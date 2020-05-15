@@ -1,9 +1,15 @@
 package testutil
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"path/filepath"
 	"runtime"
+	"testing"
 	"time"
+
+	"github.com/meteocima/wund-to-ascii/sensor"
+	"github.com/stretchr/testify/assert"
 )
 
 // FixtureDir return directory of fixtures
@@ -31,4 +37,35 @@ func MustParseISO(dateS string) time.Time {
 		panic(err)
 	}
 	return dt
+}
+
+func GetResultsFile(t *testing.T, name string) []sensor.Result {
+	fixturePath := FixtureDir(name)
+	buff, err := ioutil.ReadFile(fixturePath)
+	assert.NoError(t, err)
+	var expected []sensor.Result
+	err = json.Unmarshal(buff, &expected)
+	assert.NoError(t, err)
+	return expected
+}
+
+func SaveResultsFile(t *testing.T, name string, results interface{}) {
+	fixturePath := FixtureDir(name)
+	buff, err := json.Marshal(results)
+
+	err = ioutil.WriteFile(fixturePath, buff, 0644)
+	assert.NoError(t, err)
+}
+
+type Matcher func(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error)
+
+// AllSensorsFromFixture is
+func AllSensorsFromFixture(t *testing.T, matchDownloadedData Matcher) ([]sensor.Observation, error) {
+	pressure := GetResultsFile(t, "BAROMETRO.json")
+	precipitableWater := GetResultsFile(t, "PLUVIOMETRO.json")
+	relativeHumidity := GetResultsFile(t, "IGROMETRO.json")
+	windSpeed := GetResultsFile(t, "ANEMOMETRO.json")
+	windDirection := GetResultsFile(t, "DIREZIONEVENTO.json")
+	temperature := GetResultsFile(t, "TERMOMETRO.json")
+	return matchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }

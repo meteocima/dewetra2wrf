@@ -1,4 +1,4 @@
-package dewetra
+package conversion
 
 import (
 	"bufio"
@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/meteocima/wund-to-ascii/sensor"
 )
 
 // QC is
@@ -38,7 +40,7 @@ func integer(i int, len int) string {
 	return fmt.Sprintf(strFmt, intS)
 }
 
-func num(f SensorData, len float64) string {
+func num(f sensor.Value, len float64) string {
 	if f.IsNaN() {
 		f = -888888.0
 	}
@@ -74,8 +76,8 @@ func dataQCError3(data string) string {
 //SRFC_FMT = (F12.3,I4,F7.2,F12.3,I4,F7.3)
 //EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))
 
-// PrintObservation is
-func ToWRFDA(obs Observation) string {
+// ToWRFDA is
+func ToWRFDA(obs sensor.Observation) string {
 	elevation := 0.0
 	firstLine :=
 		str("FM-12 SYNOP", 12) +
@@ -85,16 +87,16 @@ func ToWRFDA(obs Observation) string {
 			str(obs.StationName, 40) +
 			" " +
 			integer(1, 6) +
-			num(SensorData(obs.Lat), 12.3) +
+			num(sensor.Value(obs.Lat), 12.3) +
 			space(11) +
-			num(SensorData(obs.Lon), 12.3) +
+			num(sensor.Value(obs.Lon), 12.3) +
 			space(11) +
-			num(SensorData(elevation), 12.3) +
+			num(sensor.Value(elevation), 12.3) +
 			space(11) +
 			space(6) +
 			str(obs.StationID, 40)
 
-	surfaceLevelPressure := SensorData(0.0)
+	surfaceLevelPressure := sensor.Value(0.0)
 	secondLine :=
 		dataQCError(num(surfaceLevelPressure, 12.3)) +
 			dataQCError3(num(obs.Metric.PrecipTotal, 12.3))
@@ -104,7 +106,7 @@ func ToWRFDA(obs Observation) string {
 			dataQCError(num(obs.Metric.WindspeedAvg, 12.3)) +
 			dataQCError(num(obs.WinddirAvg, 12.3)) +
 			space(11) +
-			dataQCError(num(SensorData(elevation), 12.3)) +
+			dataQCError(num(sensor.Value(elevation), 12.3)) +
 			dataQCError(num(obs.Metric.TempAvg, 12.3)) +
 			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
 			space(11) +

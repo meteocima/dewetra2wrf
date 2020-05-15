@@ -1,4 +1,4 @@
-package dewetra
+package download
 
 import (
 	"bytes"
@@ -9,10 +9,9 @@ import (
 	"net/http"
 	"path"
 	"sort"
-	"strconv"
 	"time"
 
-	"github.com/meteocima/wund-to-ascii/testutil"
+	"github.com/meteocima/wund-to-ascii/sensor"
 )
 
 const baseURL = "http://dds.cimafoundation.org/dds/rest"
@@ -43,22 +42,6 @@ type sensorReqBody struct {
 	Ids         []string `json:"ids"`
 }
 
-// SensorResult represent a sensor value at a point in time
-type SensorResult struct {
-	SortKey string
-	At      time.Time
-	Value   float64
-	ID      string
-}
-
-// SensorValue is
-func (result SensorResult) SensorValue() SensorData {
-	return SensorData(result.Value)
-}
-
-// SensorsResult represent a set of sensors value at a point in time
-type SensorsResult []SensorResult
-
 type sensorData struct {
 	SensorID string
 	Timeline []string
@@ -71,79 +54,15 @@ type sensorAnag struct {
 	Lon, Lat    float64
 }
 
-// SensorData is
-type SensorData float64
-
-// AsFloat is
-func (data SensorData) AsFloat() float64 {
-	return float64(data)
-}
-
-// IsNaN is
-func (data SensorData) IsNaN() bool {
-	return math.IsNaN(float64(data))
-}
-
-// MarshalJSON is
-func (data SensorData) MarshalJSON() ([]byte, error) {
-	if math.IsNaN(float64(data)) {
-		return []byte("\"NaN\""), nil
-	}
-	return []byte(strconv.FormatFloat(float64(data), 'f', 5, 64)), nil
-}
-
-// UnmarshalJSON is
-func (data *SensorData) UnmarshalJSON(buff []byte) error {
-	buffS := string(buff)
-	if buffS == "\"NaN\"" {
-		*data = SensorData(math.NaN())
-		return nil
-	}
-	val, err := strconv.ParseFloat(buffS, 64)
-	if err != nil {
-		return err
-	}
-	*data = SensorData(val)
-	return nil
-}
-
-// ObservationMetric is
-type ObservationMetric struct {
-	TempAvg      SensorData
-	DewptAvg     SensorData
-	WindspeedAvg SensorData
-	Pressure     SensorData
-	PrecipTotal  SensorData
-}
-
-// Observation represents data for all sensor classes of
-// a station at a moment in time
-type Observation struct {
-	StationID   string
-	StationName string
-	ObsTimeUtc  time.Time
-	Lat, Lon    float64
-	HumidityAvg SensorData
-	WinddirAvg  SensorData
-	Metric      ObservationMetric
-}
-
-func (obs Observation) SortKey() string {
-	s := fmt.Sprintf("%s:%05f:%05f", obs.StationName, obs.Lat, obs.Lon)
-	fmt.Println(s)
-	return s
-
-}
-
-func observationIsLess(this, that SensorResult) bool {
+func observationIsLess(this, that sensor.Result) bool {
 	if this.SortKey == that.SortKey {
 		return this.At.Unix() < that.At.Unix()
 	}
 	return this.SortKey < that.SortKey
 }
 
-func minObservation(results ...SensorResult) SensorResult {
-	min := SensorResult{SortKey: "ZZZZZZZZZZZZZZZZZZZZZZZZZ"}
+func minObservation(results ...sensor.Result) sensor.Result {
+	min := sensor.Result{SortKey: "ZZZZZZZZZZZZZZZZZZZZZZZZZ"}
 	for _, result := range results {
 		if observationIsLess(result, min) {
 			min = result
@@ -152,8 +71,8 @@ func minObservation(results ...SensorResult) SensorResult {
 	return min
 }
 
-// DownloadTrusted is
-func DownloadTrusted(ids []string, dateFrom, dateTo time.Time) ([]Observation, error) {
+// AllSensors is
+func AllSensors(ids []string, dateFrom, dateTo time.Time) ([]sensor.Observation, error) {
 	relativeHumidity, err := downloadRelativeHumidity(ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
@@ -184,10 +103,11 @@ func DownloadTrusted(ids []string, dateFrom, dateTo time.Time) ([]Observation, e
 		return nil, err
 	}
 
-	return matchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
+	return MatchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }
 
-func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater SensorsResult) ([]Observation, error) {
+// MatchDownloadedData is
+func MatchDownloadedData(pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error) {
 	pressureIdx := 0
 	relativeHumidityIdx := 0
 	temperatureIdx := 0
@@ -195,7 +115,7 @@ func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection,
 	windSpeedIdx := 0
 	precipitableWaterIdx := 0
 
-	results := []Observation{}
+	results := []sensor.Observation{}
 
 	sensorsTable, err := openCompleteSensorsMap()
 	if err != nil {
@@ -204,42 +124,42 @@ func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection,
 
 	for {
 
-		var pressureItem SensorResult
+		var pressureItem sensor.Result
 		if len(pressure) > pressureIdx {
 			pressureItem = pressure[pressureIdx]
 		} else {
 			pressureItem.SortKey = "ZZZZZZZZZZ"
 		}
 
-		var relativeHumidityItem SensorResult
+		var relativeHumidityItem sensor.Result
 		if len(relativeHumidity) > relativeHumidityIdx {
 			relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
 		} else {
 			relativeHumidityItem.SortKey = "ZZZZZZZZZZ"
 		}
 
-		var temperatureItem SensorResult
+		var temperatureItem sensor.Result
 		if len(temperature) > temperatureIdx {
 			temperatureItem = temperature[temperatureIdx]
 		} else {
 			temperatureItem.SortKey = "ZZZZZZZZZZ"
 		}
 
-		var windDirectionItem SensorResult
+		var windDirectionItem sensor.Result
 		if len(windDirection) > windDirectionIdx {
 			windDirectionItem = windDirection[windDirectionIdx]
 		} else {
 			windDirectionItem.SortKey = "ZZZZZZZZZZ"
 		}
 
-		var windSpeedItem SensorResult
+		var windSpeedItem sensor.Result
 		if len(windSpeed) > windSpeedIdx {
 			windSpeedItem = windSpeed[windSpeedIdx]
 		} else {
 			windSpeedItem.SortKey = "ZZZZZZZZZZ"
 		}
 
-		var precipitableWaterItem SensorResult
+		var precipitableWaterItem sensor.Result
 		if len(precipitableWater) > precipitableWaterIdx {
 			precipitableWaterItem = precipitableWater[precipitableWaterIdx]
 		} else {
@@ -258,20 +178,20 @@ func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection,
 		minItem := minObservation(pressureItem, relativeHumidityItem, temperatureItem, windDirectionItem, windSpeedItem, precipitableWaterItem)
 		station := sensorsTable[minItem.ID]
 
-		currentObs := Observation{
+		currentObs := sensor.Observation{
 			ObsTimeUtc:  minItem.At,
 			StationID:   station.ID,
 			StationName: station.StationName,
 			Lat:         station.Lat,
 			Lon:         station.Lon,
-			HumidityAvg: SensorData(math.NaN()),
-			WinddirAvg:  SensorData(math.NaN()),
-			Metric: ObservationMetric{
-				DewptAvg:     SensorData(math.NaN()),
-				PrecipTotal:  SensorData(math.NaN()),
-				Pressure:     SensorData(math.NaN()),
-				TempAvg:      SensorData(math.NaN()),
-				WindspeedAvg: SensorData(math.NaN()),
+			HumidityAvg: sensor.Value(math.NaN()),
+			WinddirAvg:  sensor.Value(math.NaN()),
+			Metric: sensor.ObservationMetric{
+				DewptAvg:     sensor.Value(math.NaN()),
+				PrecipTotal:  sensor.Value(math.NaN()),
+				Pressure:     sensor.Value(math.NaN()),
+				TempAvg:      sensor.Value(math.NaN()),
+				WindspeedAvg: sensor.Value(math.NaN()),
 			},
 		}
 
@@ -312,37 +232,31 @@ func matchDownloadedData(pressure, relativeHumidity, temperature, windDirection,
 	return results, nil
 }
 
-// downloadRelativeHumidity is
-func downloadRelativeHumidity(ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadRelativeHumidity(ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	return downloadDewetraSensor("IGROMETRO", ids, dateFrom, dateTo)
 }
 
-// downloadTemperature is
-func downloadTemperature(ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadTemperature(ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	return downloadDewetraSensor("TERMOMETRO", ids, dateFrom, dateTo)
 }
 
-// downloadWindDirection is
-func downloadWindDirection(ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadWindDirection(ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	return downloadDewetraSensor("DIREZIONEVENTO", ids, dateFrom, dateTo)
 }
 
-// downloadWindSpeed is
-func downloadWindSpeed(ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadWindSpeed(ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	return downloadDewetraSensor("ANEMOMETRO", ids, dateFrom, dateTo)
 }
 
-// downloadPrecipitableWater is
-func downloadPrecipitableWater(ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadPrecipitableWater(ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	return downloadDewetraSensor("PLUVIOMETRO", ids, dateFrom, dateTo)
 }
 
-// downloadPrecipitableWater is
-func downloadPressure(ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadPressure(ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	return downloadDewetraSensor("BAROMETRO", ids, dateFrom, dateTo)
 }
 
-func downloadDewetraSensor(sensorClass string, ids []string, dateFrom, dateTo time.Time) (SensorsResult, error) {
+func downloadDewetraSensor(sensorClass string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
 	url := fmt.Sprintf("%s/drops_sensors/serie", baseURL)
 
 	sensorReq := sensorReqBody{
@@ -380,7 +294,7 @@ func downloadDewetraSensor(sensorClass string, ids []string, dateFrom, dateTo ti
 		return nil, err
 	}
 
-	sensorObservations := SensorsResult{}
+	sensorObservations := []sensor.Result{}
 	observationLess := func(i, j int) bool {
 		if sensorObservations[i].SortKey == sensorObservations[j].SortKey {
 			return sensorObservations[i].At.Unix() < sensorObservations[j].At.Unix()
@@ -400,19 +314,19 @@ func downloadDewetraSensor(sensorClass string, ids []string, dateFrom, dateTo ti
 		return nil, err
 	}
 
-	for _, sensor := range data {
-		for idx, dateS := range sensor.Timeline {
+	for _, sens := range data {
+		for idx, dateS := range sens.Timeline {
 			at, err := time.Parse("200601021504", dateS)
 			if err != nil {
 				return nil, err
 			}
 
-			sensAnag := sensorsTable[sensor.SensorID]
-			sensorObservations = append(sensorObservations, SensorResult{
+			sensAnag := sensorsTable[sens.SensorID]
+			sensorObservations = append(sensorObservations, sensor.Result{
 				At:      at,
-				Value:   sensor.Values[idx],
+				Value:   sens.Values[idx],
 				SortKey: fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon),
-				ID:      sensor.SensorID,
+				ID:      sens.SensorID,
 			})
 		}
 	}
@@ -436,7 +350,7 @@ func openSensorsMap(sensorClass string) (map[string]sensorAnag, error) {
 func fillSensorsMap(sensorClass string, sensorsTable map[string]sensorAnag) error {
 	sensorsAnag := []sensorAnag{}
 
-	sensorsAnagContent, err := ioutil.ReadFile(path.Join(testutil.FixtureDir(".."), "data", sensorClass+".json"))
+	sensorsAnagContent, err := ioutil.ReadFile(path.Join( /*testutil.FixtureDir(".."),*/ "../data", sensorClass+".json"))
 	if err != nil {
 		return err
 	}
