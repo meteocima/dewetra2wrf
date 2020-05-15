@@ -72,33 +72,101 @@ func minObservation(results ...sensor.Result) sensor.Result {
 	return min
 }
 
+type byName struct {
+	ids   []string
+	table map[string]sensorAnag
+}
+
+// Len is the number of elements in the collection.
+func (bn byName) Len() int {
+	return len(bn.ids)
+}
+
+// Less reports whether the element with
+// index i should sort before the element with index j.
+func (bn byName) Less(i, j int) bool {
+	idI := bn.ids[i]
+	idJ := bn.ids[j]
+	return bn.table[idI].StationName < bn.table[idJ].StationName
+}
+
+// Swap swaps the elements with indexes i and j.
+func (bn byName) Swap(i, j int) {
+	save := bn.ids[i]
+	bn.ids[i] = bn.ids[j]
+	bn.ids[j] = save
+}
+
+func getSensorsIds(dataPath string, sensorClass string) ([]string, error) {
+	sensorsTable := map[string]sensorAnag{}
+	err := fillSensorsMap(dataPath, sensorClass, sensorsTable)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, len(sensorsTable))
+	i := 0
+	for _, sens := range sensorsTable {
+		ids[i] = sens.ID
+		i++
+	}
+
+	sort.Sort(byName{ids, sensorsTable})
+
+	return ids[0:20], nil
+}
+
 // AllSensors is
-func AllSensors(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Observation, error) {
+func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observation, error) {
+	ids, err := getSensorsIds(dataPath, "IGROMETRO")
+	if err != nil {
+		return nil, err
+	}
 	relativeHumidity, err := downloadRelativeHumidity(dataPath, ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
 	}
 
+	ids, err = getSensorsIds(dataPath, "TERMOMETRO")
+	if err != nil {
+		return nil, err
+	}
 	temperature, err := downloadTemperature(dataPath, ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
 	}
 
+	ids, err = getSensorsIds(dataPath, "DIREZIONEVENTO")
+	if err != nil {
+		return nil, err
+	}
 	windDirection, err := downloadWindDirection(dataPath, ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
 	}
 
+	ids, err = getSensorsIds(dataPath, "ANEMOMETRO")
+	if err != nil {
+		return nil, err
+	}
 	windSpeed, err := downloadWindSpeed(dataPath, ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
 	}
 
+	ids, err = getSensorsIds(dataPath, "PLUVIOMETRO")
+	if err != nil {
+		return nil, err
+	}
 	precipitableWater, err := downloadPrecipitableWater(dataPath, ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
 	}
 
+	ids, err = getSensorsIds(dataPath, "BAROMETRO")
+	if err != nil {
+		return nil, err
+	}
 	pressure, err := downloadPressure(dataPath, ids, dateFrom, dateTo)
 	if err != nil {
 		return nil, err
@@ -226,6 +294,7 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 			pressureIdx++
 		}
 
+		currentObs.CalculateDewpoint()
 		results = append(results, currentObs)
 
 	}
@@ -368,7 +437,7 @@ func fillSensorsMap(dataPath string, sensorClass string, sensorsTable map[string
 	return nil
 }
 
-func downloadAllSensorsTables(dataPath string, collection sensor.Collection) error {
+func DownloadAllSensorsTables(dataPath string, collection sensor.Collection) error {
 	err := downloadSensorsTable(dataPath, collection, "IGROMETRO")
 	if err != nil {
 		return err

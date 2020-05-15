@@ -108,3 +108,29 @@ func (obs Observation) SortKey() string {
 	return s
 
 }
+
+// Constant related to Arden Buck equation
+const (
+	a = 6.1121 // mbar
+	b = 18.678
+	c = 257.14 // °C,
+	d = 234.5
+)
+
+// CalculateDewpoint calcultes the dewpoint temperature using
+// [Arden Buck equation[(https://en.wikipedia.org/wiki/Dew_point#Calculating_the_dew_point)
+// Calculated value is stored directly in the Observation object DewptAvg
+// field.
+func (obs *Observation) CalculateDewpoint() {
+	if obs.HumidityAvg.IsNaN() || obs.Metric.TempAvg.IsNaN() {
+		obs.Metric.DewptAvg = Value(math.NaN())
+		return
+	}
+
+	RH := obs.HumidityAvg.AsFloat() / 100
+	T := obs.Metric.TempAvg.AsFloat()
+	exp := (b - T/d) * (T / (c + T))
+	gammaM := math.Log(RH * math.Pow(math.E, exp))
+
+	obs.Metric.DewptAvg = Value((c * gammaM) / (b - gammaM))
+}

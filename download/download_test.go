@@ -112,7 +112,7 @@ func TestDownloadAllSensorsTables(t *testing.T) {
 	err := os.MkdirAll(dataPath, os.FileMode(0755))
 	assert.NoError(t, err)
 
-	err = downloadAllSensorsTables(dataPath, sensor.DPCTrusted)
+	err = DownloadAllSensorsTables(dataPath, sensor.DPCTrusted)
 	assert.NoError(t, err)
 
 	assert.FileExists(t, path.Join(dataPath, "BAROMETRO.json"))
