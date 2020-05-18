@@ -134,3 +134,8 @@ func (obs *Observation) CalculateDewpoint() {
 
 	obs.Metric.DewptAvg = Value((c * gammaM) / (b - gammaM))
 }
+
+// Domain is
+type Domain struct {
+	MinLat, MinLon, MaxLat, MaxLon float64
+}

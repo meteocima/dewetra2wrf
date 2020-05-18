@@ -50,9 +50,9 @@ type sensorData struct {
 }
 
 type sensorAnag struct {
-	ID          string
-	StationName string
-	Lon, Lat    float64
+	ID                  string
+	StationName         string
+	Lon, Lat, Elevation float64
 }
 
 func observationIsLess(this, that sensor.Result) bool {
@@ -63,7 +63,7 @@ func observationIsLess(this, that sensor.Result) bool {
 }
 
 func minObservation(results ...sensor.Result) sensor.Result {
-	min := sensor.Result{SortKey: "ZZZZZZZZZZZZZZZZZZZZZZZZZ"}
+	min := sensor.Result{SortKey: "zzzzzzzzzzzzzzzzzzzzzzzzz"}
 	for _, result := range results {
 		if observationIsLess(result, min) {
 			min = result
@@ -113,7 +113,7 @@ func getSensorsIds(dataPath string, sensorClass string) ([]string, error) {
 
 	sort.Sort(byName{ids, sensorsTable})
 
-	return ids[0:20], nil
+	return ids, nil
 }
 
 // AllSensors is
@@ -197,50 +197,50 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 		if len(pressure) > pressureIdx {
 			pressureItem = pressure[pressureIdx]
 		} else {
-			pressureItem.SortKey = "ZZZZZZZZZZ"
+			pressureItem.SortKey = "zzzzzzzzzz"
 		}
 
 		var relativeHumidityItem sensor.Result
 		if len(relativeHumidity) > relativeHumidityIdx {
 			relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
 		} else {
-			relativeHumidityItem.SortKey = "ZZZZZZZZZZ"
+			relativeHumidityItem.SortKey = "zzzzzzzzzz"
 		}
 
 		var temperatureItem sensor.Result
 		if len(temperature) > temperatureIdx {
 			temperatureItem = temperature[temperatureIdx]
 		} else {
-			temperatureItem.SortKey = "ZZZZZZZZZZ"
+			temperatureItem.SortKey = "zzzzzzzzzz"
 		}
 
 		var windDirectionItem sensor.Result
 		if len(windDirection) > windDirectionIdx {
 			windDirectionItem = windDirection[windDirectionIdx]
 		} else {
-			windDirectionItem.SortKey = "ZZZZZZZZZZ"
+			windDirectionItem.SortKey = "zzzzzzzzzz"
 		}
 
 		var windSpeedItem sensor.Result
 		if len(windSpeed) > windSpeedIdx {
 			windSpeedItem = windSpeed[windSpeedIdx]
 		} else {
-			windSpeedItem.SortKey = "ZZZZZZZZZZ"
+			windSpeedItem.SortKey = "zzzzzzzzzz"
 		}
 
 		var precipitableWaterItem sensor.Result
 		if len(precipitableWater) > precipitableWaterIdx {
 			precipitableWaterItem = precipitableWater[precipitableWaterIdx]
 		} else {
-			precipitableWaterItem.SortKey = "ZZZZZZZZZZ"
+			precipitableWaterItem.SortKey = "zzzzzzzzzz"
 		}
 
-		if relativeHumidityItem.SortKey == "ZZZZZZZZZZ" &&
-			temperatureItem.SortKey == "ZZZZZZZZZZ" &&
-			windDirectionItem.SortKey == "ZZZZZZZZZZ" &&
-			windSpeedItem.SortKey == "ZZZZZZZZZZ" &&
-			precipitableWaterItem.SortKey == "ZZZZZZZZZZ" &&
-			pressureItem.SortKey == "ZZZZZZZZZZ" {
+		if relativeHumidityItem.SortKey == "zzzzzzzzzz" &&
+			temperatureItem.SortKey == "zzzzzzzzzz" &&
+			windDirectionItem.SortKey == "zzzzzzzzzz" &&
+			windSpeedItem.SortKey == "zzzzzzzzzz" &&
+			precipitableWaterItem.SortKey == "zzzzzzzzzz" &&
+			pressureItem.SortKey == "zzzzzzzzzz" {
 			break
 		}
 
@@ -417,7 +417,75 @@ func openSensorsMap(dataPath string, sensorClass string) (map[string]sensorAnag,
 	return sensorsTable, nil
 }
 
-func fillSensorsMap(dataPath string, sensorClass string, sensorsTable map[string]sensorAnag) error {
+func getElevation(sensor sensorAnag) (float64, error) {
+	url := fmt.Sprintf("https://api.airmap.com/elevation/v1/ele/?points=%6f,%6f", sensor.Lat, sensor.Lon)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-API-Key", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHx2YkJZOEs2dTAzRFdYZ1NaZDRvbkVodjJhMG9SIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxEbzhFV1hKQzBOOEU4elVwcW45dkxUbFBYUE1SIiwib3JnYW5pemF0aW9uX2lkIjoiZGV2ZWxvcGVyfGE2Tk9LNUJ0S3ZBeHZkY2V3SzJrdmZ3ZUo5cUUiLCJpYXQiOjE1ODk3OTA2MTd9.dzqy2VbQtmHrf4sKwlb3S0PdLiqGS4ms4LFvKeWmMkY")
+
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return 0, fmt.Errorf("HTTP response %d", res.StatusCode)
+	}
+
+	content, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	var data struct {
+		Data []float64
+	}
+
+	err = json.Unmarshal(content, &data)
+	if err != nil {
+		return 0, err
+	}
+
+	return data.Data[0], nil
+}
+
+func readElevationsFromFile(dataPath string) (map[string]float64, error) {
+	elevFile := path.Join("./elevations.json")
+	elevations := map[string]float64{}
+
+	elevationsContent, err := ioutil.ReadFile(elevFile)
+	if err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+
+	if err == nil {
+		err = json.Unmarshal(elevationsContent, &elevations)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return elevations, nil
+}
+
+func saveElevationsToFile(dataPath string, elevations map[string]float64) error {
+	buff, err := json.MarshalIndent(elevations, " ", " ")
+	if err != nil {
+		return err
+	}
+	elevFile := path.Join("./elevations.json")
+
+	return ioutil.WriteFile(elevFile, buff, os.FileMode(0644))
+
+}
+
+func fillSensorsMap(dataPath string /*, domain sensor.Domain*/, sensorClass string, sensorsTable map[string]sensorAnag) error {
 	sensorsAnag := []sensorAnag{}
 	///*testutil.FixtureDir(".."),*/ "../data"
 	sensorsAnagContent, err := ioutil.ReadFile(path.Join(dataPath, sensorClass+".json"))
@@ -430,7 +498,29 @@ func fillSensorsMap(dataPath string, sensorClass string, sensorsTable map[string
 		return err
 	}
 
-	for _, sensor := range sensorsAnag {
+	elevations, err := readElevationsFromFile(dataPath)
+	if err != nil {
+		return err
+	}
+
+	for n, sensor := range sensorsAnag {
+		stKey := fmt.Sprintf("%f:%f", sensor.Lat, sensor.Lon)
+		elevation, ok := elevations[stKey]
+		if !ok {
+			fmt.Println(n, stKey)
+			elevation, err := getElevation(sensor)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			elevations[stKey] = elevation
+			err = saveElevationsToFile(dataPath, elevations)
+			if err != nil {
+				return err
+			}
+		}
+
+		sensor.Elevation = elevation
 		sensorsTable[sensor.ID] = sensor
 	}
 
