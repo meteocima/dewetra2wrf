@@ -255,6 +255,7 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 			Lon:         station.Lon,
 			HumidityAvg: sensor.Value(math.NaN()),
 			WinddirAvg:  sensor.Value(math.NaN()),
+			Elevation:   station.Elevation,
 			Metric: sensor.ObservationMetric{
 				DewptAvg:     sensor.Value(math.NaN()),
 				PrecipTotal:  sensor.Value(math.NaN()),

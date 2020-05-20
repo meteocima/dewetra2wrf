@@ -93,6 +93,7 @@ type ObservationMetric struct {
 // Observation represents data for all sensor classes of
 // a station at a moment in time
 type Observation struct {
+	Elevation   float64
 	StationID   string
 	StationName string
 	ObsTimeUtc  time.Time

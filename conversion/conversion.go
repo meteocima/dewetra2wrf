@@ -78,7 +78,6 @@ func dataQCError3(data string) string {
 
 // ToWRFDA is
 func ToWRFDA(obs sensor.Observation) string {
-	elevation := 0.0
 	firstLine :=
 		str("FM-12 SYNOP", 12) +
 			" " +
@@ -91,7 +90,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			space(11) +
 			num(sensor.Value(obs.Lon), 12.3) +
 			space(11) +
-			num(sensor.Value(elevation), 12.3) +
+			num(sensor.Value(obs.Elevation), 12.3) +
 			space(11) +
 			space(6) +
 			str(obs.StationID, 40)
@@ -106,7 +105,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			dataQCError(num(obs.Metric.WindspeedAvg, 12.3)) +
 			dataQCError(num(obs.WinddirAvg, 12.3)) +
 			space(11) +
-			dataQCError(num(sensor.Value(elevation), 12.3)) +
+			dataQCError(num(sensor.Value(obs.Elevation), 12.3)) +
 			dataQCError(num(obs.Metric.TempAvg, 12.3)) +
 			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
 			space(11) +
