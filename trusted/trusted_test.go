@@ -1,16 +1,20 @@
 package trusted
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/meteocima/wund-to-ascii/sensor"
 
 	"github.com/meteocima/wund-to-ascii/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
-var header = "TOTAL =   9061, MISS. =-888888.,\n" +
+var header = "MISS. =-888888.,\n" +
 	"SYNOP =  10000, METAR =   2416, SHIP  =     54, BUOY  =    341, BOGUS =      0, TEMP  =     86,\n" +
 	"AMDAR =     14, AIREP =    205, TAMDAR=      0, PILOT =     85, SATEM =    106, SATOB =   2556,\n" +
 	"GPSPW =    187, GPSZD =      0, GPSRF =      3, GPSEP =      0, SSMT1 =      0, SSMT2 =      0,\n" +
@@ -36,9 +40,20 @@ func TestDownloadPrecipitableWater(t *testing.T) {
 	data := testutil.FixtureDir("testanagr")
 	os.MkdirAll(data, os.FileMode(0755))
 	defer os.RemoveAll(data)
-	results, err := DownloadAndConvert(data, time.Date(2020, 5, 10, 0, 0, 0, 0, time.UTC), time.Date(2020, 5, 10, 1, 0, 0, 0, time.UTC))
+	results, err := DownloadAndConvert(
+		data,
+		// LIGURIA sensor.Domain{MinLat: 43, MinLon: 7, MaxLat: 44, MaxLon: 10},
+		sensor.Domain{MinLat: 34, MinLon: 4, MaxLat: 47, MaxLon: 20},
+		time.Date(2020, 5, 10, 0, 0, 0, 0, time.UTC),
+		time.Date(2020, 5, 10, 1, 0, 0, 0, time.UTC),
+	)
+
+	resultsS := strings.Join(results, "\n")
+
+	totalS := fmt.Sprintf("TOTAL = %6d, ", len(results))
+
 	assert.NoError(t, err)
-	err = ioutil.WriteFile("/home/parroit/dpc.txt", []byte(header+results), os.FileMode(0644))
+	err = ioutil.WriteFile("/home/parroit/dpc.txt", []byte(totalS+header+resultsS), os.FileMode(0644))
 	assert.NoError(t, err)
 	assert.Equal(t, "", results)
 

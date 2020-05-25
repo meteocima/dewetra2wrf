@@ -97,18 +97,19 @@ func (bn byName) Swap(i, j int) {
 	bn.ids[j] = save
 }
 
-func getSensorsIds(dataPath string, sensorClass string) ([]string, error) {
+func getSensorsIds(dataPath string, domain sensor.Domain, sensorClass string) ([]string, error) {
 	sensorsTable := map[string]sensorAnag{}
 	err := fillSensorsMap(dataPath, sensorClass, sensorsTable)
 	if err != nil {
 		return nil, err
 	}
 
-	ids := make([]string, len(sensorsTable))
-	i := 0
+	ids := []string{}
 	for _, sens := range sensorsTable {
-		ids[i] = sens.ID
-		i++
+		if sens.Lat >= domain.MinLat && sens.Lat <= domain.MaxLat &&
+			sens.Lon >= domain.MinLon && sens.Lon <= domain.MaxLon {
+			ids = append(ids, sens.ID)
+		}
 	}
 
 	sort.Sort(byName{ids, sensorsTable})
@@ -117,8 +118,8 @@ func getSensorsIds(dataPath string, sensorClass string) ([]string, error) {
 }
 
 // AllSensors is
-func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observation, error) {
-	ids, err := getSensorsIds(dataPath, "IGROMETRO")
+func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Time) ([]sensor.Observation, error) {
+	ids, err := getSensorsIds(dataPath, domain, "IGROMETRO")
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +128,7 @@ func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observati
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, "TERMOMETRO")
+	ids, err = getSensorsIds(dataPath, domain, "TERMOMETRO")
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +137,7 @@ func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observati
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, "DIREZIONEVENTO")
+	ids, err = getSensorsIds(dataPath, domain, "DIREZIONEVENTO")
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +146,7 @@ func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observati
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, "ANEMOMETRO")
+	ids, err = getSensorsIds(dataPath, domain, "ANEMOMETRO")
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +155,7 @@ func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observati
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, "PLUVIOMETRO")
+	ids, err = getSensorsIds(dataPath, domain, "PLUVIOMETRO")
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func AllSensors(dataPath string, dateFrom, dateTo time.Time) ([]sensor.Observati
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, "BAROMETRO")
+	ids, err = getSensorsIds(dataPath, domain, "BAROMETRO")
 	if err != nil {
 		return nil, err
 	}

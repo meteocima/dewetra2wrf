@@ -1,7 +1,6 @@
 package trusted
 
 import (
-	"strings"
 	"time"
 
 	"github.com/meteocima/wund-to-ascii/conversion"
@@ -10,12 +9,12 @@ import (
 	"github.com/meteocima/wund-to-ascii/download"
 )
 
-func DownloadAndConvert(dataPath string, from, to time.Time) (string, error) {
+func DownloadAndConvert(dataPath string, domain sensor.Domain, from, to time.Time) ([]string, error) {
 	download.DownloadAllSensorsTables(dataPath, sensor.DPCTrusted)
 
-	sensorsObservations, err := download.AllSensors(dataPath, from, to)
+	sensorsObservations, err := download.AllSensors(dataPath, domain, from, to)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	results := make([]string, len(sensorsObservations))
@@ -23,5 +22,5 @@ func DownloadAndConvert(dataPath string, from, to time.Time) (string, error) {
 		results[i] = conversion.ToWRFDA(result)
 	}
 
-	return strings.Join(results, "\n"), nil
+	return results, nil
 }
