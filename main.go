@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"time"
 
 	"github.com/meteocima/wund-to-ascii/sensor"
@@ -36,7 +37,7 @@ func main() {
 		dateFrom,
 		dateFrom.Add(time.Hour),
 
-		"/home/parroit/dpc.txt",
+		path.Join(data, "ob.ascii"),
 	)
 	if err != nil {
 		log.Fatal(err)
