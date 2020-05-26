@@ -458,7 +458,7 @@ func getElevation(sensor sensorAnag) (float64, error) {
 }
 
 func readElevationsFromFile(dataPath string) (map[string]float64, error) {
-	elevFile := path.Join("./elevations.json")
+	elevFile := path.Join(dataPath, "elevations.json")
 	elevations := map[string]float64{}
 
 	elevationsContent, err := ioutil.ReadFile(elevFile)
@@ -481,7 +481,7 @@ func saveElevationsToFile(dataPath string, elevations map[string]float64) error 
 	if err != nil {
 		return err
 	}
-	elevFile := path.Join("./elevations.json")
+	elevFile := path.Join(dataPath, "elevations.json")
 
 	return ioutil.WriteFile(elevFile, buff, os.FileMode(0644))
 
