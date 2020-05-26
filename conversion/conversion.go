@@ -81,7 +81,7 @@ func ToWRFDA(obs sensor.Observation) string {
 	firstLine :=
 		str("FM-12 SYNOP", 12) +
 			" " +
-			date(obs.ObsTimeUtc) +
+			date(obs.ObsTimeUtc.Add(time.Hour*2)) +
 			" " +
 			str("XXXXXX", 40) +
 			" " +
