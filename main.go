@@ -35,7 +35,7 @@ func main() {
 		// -19.0, 48.0, 64.0, 24.0
 		sensor.Domain{MinLat: 24, MinLon: -19, MaxLat: 64, MaxLon: 48},
 		dateFrom,
-		dateFrom.Add(time.Hour),
+		dateFrom, //.Add(time.Hour),
 
 		path.Join(data, "ob.ascii"),
 	)

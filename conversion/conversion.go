@@ -83,7 +83,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			" " +
 			date(obs.ObsTimeUtc) +
 			" " +
-			str(obs.StationName, 40) +
+			str("XXXXXX", 40) +
 			" " +
 			integer(1, 6) +
 			num(sensor.Value(obs.Lat), 12.3) +
@@ -93,7 +93,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			num(sensor.Value(obs.Elevation), 12.3) +
 			space(11) +
 			space(6) +
-			str(obs.StationID, 40)
+			str("XXXXXX", 40)
 
 	surfaceLevelPressure := sensor.Value(0.0)
 	secondLine :=
