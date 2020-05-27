@@ -35,10 +35,10 @@ var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))\n" +
 	"#------------------------------------------------------------------------------#\n"
 
-func DownloadAndConvert(dataPath string, domain sensor.Domain, from, to time.Time, filename string) error {
+func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, filename string) error {
 	download.DownloadAllSensorsTables(dataPath, sensor.DPCTrusted)
 
-	sensorsObservations, err := download.AllSensors(dataPath, domain, from, to)
+	sensorsObservations, err := download.AllSensors(dataPath, domain, date)
 	if err != nil {
 		return err
 	}

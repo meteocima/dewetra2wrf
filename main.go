@@ -17,7 +17,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dateFrom, err := time.Parse("2006010215", os.Args[1])
+	date, err := time.Parse("2006010215", os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,8 +34,7 @@ func main() {
 		// leftlon, rightlon, toplat, bottomlat
 		// -19.0, 48.0, 64.0, 24.0
 		sensor.Domain{MinLat: 24, MinLon: -19, MaxLat: 64, MaxLon: 48},
-		dateFrom,
-		dateFrom, //.Add(time.Hour),
+		date,
 
 		path.Join(data, "ob.ascii"),
 	)

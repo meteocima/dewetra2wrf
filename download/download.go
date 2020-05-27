@@ -118,12 +118,12 @@ func getSensorsIds(dataPath string, domain sensor.Domain, sensorClass string) ([
 }
 
 // AllSensors is
-func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Time) ([]sensor.Observation, error) {
+func AllSensors(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
 	ids, err := getSensorsIds(dataPath, domain, "IGROMETRO")
 	if err != nil {
 		return nil, err
 	}
-	relativeHumidity, err := downloadRelativeHumidity(dataPath, ids, dateFrom, dateTo)
+	relativeHumidity, err := downloadRelativeHumidity(dataPath, ids, date)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Tim
 	if err != nil {
 		return nil, err
 	}
-	temperature, err := downloadTemperature(dataPath, ids, dateFrom, dateTo)
+	temperature, err := downloadTemperature(dataPath, ids, date)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Tim
 	if err != nil {
 		return nil, err
 	}
-	windDirection, err := downloadWindDirection(dataPath, ids, dateFrom, dateTo)
+	windDirection, err := downloadWindDirection(dataPath, ids, date)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Tim
 	if err != nil {
 		return nil, err
 	}
-	windSpeed, err := downloadWindSpeed(dataPath, ids, dateFrom, dateTo)
+	windSpeed, err := downloadWindSpeed(dataPath, ids, date)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Tim
 	if err != nil {
 		return nil, err
 	}
-	precipitableWater, err := downloadPrecipitableWater(dataPath, ids, dateFrom, dateTo)
+	precipitableWater, err := downloadPrecipitableWater(dataPath, ids, date)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func AllSensors(dataPath string, domain sensor.Domain, dateFrom, dateTo time.Tim
 	if err != nil {
 		return nil, err
 	}
-	pressure, err := downloadPressure(dataPath, ids, dateFrom, dateTo)
+	pressure, err := downloadPressure(dataPath, ids, date)
 	if err != nil {
 		return nil, err
 	}
@@ -304,32 +304,35 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 	return results, nil
 }
 
-func downloadRelativeHumidity(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "IGROMETRO", ids, dateFrom, dateTo)
+func downloadRelativeHumidity(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
+	return downloadDewetraSensor(dataPath, "IGROMETRO", ids, date)
 }
 
-func downloadTemperature(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "TERMOMETRO", ids, dateFrom, dateTo)
+func downloadTemperature(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
+	return downloadDewetraSensor(dataPath, "TERMOMETRO", ids, date)
 }
 
-func downloadWindDirection(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "DIREZIONEVENTO", ids, dateFrom, dateTo)
+func downloadWindDirection(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
+	return downloadDewetraSensor(dataPath, "DIREZIONEVENTO", ids, date)
 }
 
-func downloadWindSpeed(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "ANEMOMETRO", ids, dateFrom, dateTo)
+func downloadWindSpeed(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
+	return downloadDewetraSensor(dataPath, "ANEMOMETRO", ids, date)
 }
 
-func downloadPrecipitableWater(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "PLUVIOMETRO", ids, dateFrom, dateTo)
+func downloadPrecipitableWater(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
+	return downloadDewetraSensor(dataPath, "PLUVIOMETRO", ids, date)
 }
 
-func downloadPressure(dataPath string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "BAROMETRO", ids, dateFrom, dateTo)
+func downloadPressure(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
+	return downloadDewetraSensor(dataPath, "BAROMETRO", ids, date)
 }
 
-func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, dateFrom, dateTo time.Time) ([]sensor.Result, error) {
+func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, date time.Time) ([]sensor.Result, error) {
 	url := fmt.Sprintf("%s/drops_sensors/serie", baseURL)
+
+	dateFrom := date.Add(-time.Minute * 30)
+	dateTo := date.Add(time.Minute * 30)
 
 	sensorReq := sensorReqBody{
 		SensorClass: sensorClass,
@@ -386,6 +389,8 @@ func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, da
 		return nil, err
 	}
 
+	betterTimed := map[string]sensor.Result{}
+
 	for _, sens := range data {
 		for idx, dateS := range sens.Timeline {
 			at, err := time.Parse("200601021504", dateS)
@@ -393,14 +398,34 @@ func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, da
 				return nil, err
 			}
 
+			at = at.Add(time.Hour * 2)
+
 			sensAnag := sensorsTable[sens.SensorID]
-			sensorObservations = append(sensorObservations, sensor.Result{
-				At:      at,
-				Value:   sens.Values[idx],
-				SortKey: fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon),
-				ID:      sens.SensorID,
-			})
+			sortKey := fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon)
+
+			betterTimedObs, ok := betterTimed[sortKey]
+
+			dateS := date.Format("20060102 15:04")
+			atS := at.Format("20060102 15:04")
+			betterS := betterTimedObs.At.Format("20060102 15:04")
+
+			_, _, _ = dateS, atS, betterS
+
+			if !ok || math.Abs(at.Sub(date).Minutes()) < math.Abs(betterTimedObs.At.Sub(date).Minutes()) {
+				sensorResult := sensor.Result{
+					At:      at,
+					Value:   sens.Values[idx],
+					SortKey: sortKey,
+					ID:      sens.SensorID,
+				}
+				betterTimed[sortKey] = sensorResult
+				//sensorObservations = append(sensorObservations, sensorResult)
+			}
 		}
+	}
+
+	for _, sens := range betterTimed {
+		sensorObservations = append(sensorObservations, sens)
 	}
 
 	sort.SliceStable(sensorObservations, observationLess)
