@@ -292,11 +292,18 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 		}
 
 		if pressureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(pressureItem.At) {
-			currentObs.Metric.Pressure = precipitableWaterItem.SensorValue()
+			currentObs.Metric.Pressure = pressureItem.SensorValue()
 			pressureIdx++
 		}
 
+		// formula for dewpoint calculation must be applied with
+		// temperature stil in celsius
 		currentObs.CalculateDewpoint()
+
+		// convert temperatures from °celsius to °kelvin
+		currentObs.Metric.DewptAvg += 273.15
+		currentObs.Metric.TempAvg += 273.15
+
 		results = append(results, currentObs)
 
 	}

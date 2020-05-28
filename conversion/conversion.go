@@ -96,6 +96,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			str("XXXXXX", 40)
 
 	surfaceLevelPressure := sensor.Value(0.0)
+
 	secondLine :=
 		dataQCError(num(surfaceLevelPressure, 12.3)) +
 			dataQCError3(num(obs.Metric.PrecipTotal, 12.3))
