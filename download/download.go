@@ -304,6 +304,9 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 		currentObs.Metric.DewptAvg += 273.15
 		currentObs.Metric.TempAvg += 273.15
 
+		// convert pression from hPa to Pa
+		currentObs.Metric.Pressure *= 100
+
 		results = append(results, currentObs)
 
 	}
