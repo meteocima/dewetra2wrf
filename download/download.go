@@ -294,6 +294,8 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 		if pressureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(pressureItem.At) {
 			currentObs.Metric.Pressure = pressureItem.SensorValue()
 			pressureIdx++
+		} else {
+			currentObs.Metric.Pressure = 101.301898
 		}
 
 		// formula for dewpoint calculation must be applied with
