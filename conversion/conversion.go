@@ -107,7 +107,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			num(sensor.Value(obs.Elevation), 12.3) +
 			space(11) +
 			space(6) +
-			str(obs.StationID, 40)
+			str(onlyletters(obs.StationID), 40)
 
 	surfaceLevelPressure := sensor.Value(math.NaN())
 	precipTotal := sensor.Value(math.NaN()) // obs.Metric.PrecipTotal
