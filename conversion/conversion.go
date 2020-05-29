@@ -74,7 +74,7 @@ func dataQCError3(data string) string {
 func onlyletters(s string) string {
 	res := ""
 	for _, rune := range s {
-		if rune == ' ' || (unicode.IsLetter(rune) && rune < unicode.MaxASCII) {
+		if unicode.IsLetter(rune) && rune < unicode.MaxASCII {
 			res += string(rune)
 		} else {
 			res += string('X')
