@@ -405,7 +405,7 @@ func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, da
 				return nil, err
 			}
 
-			at = at.Add(time.Hour * 2)
+			//at = at.Add(time.Hour * 2)
 
 			sensAnag := sensorsTable[sens.SensorID]
 			sortKey := fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon)
