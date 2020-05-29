@@ -74,7 +74,7 @@ func dataQCError3(data string) string {
 func onlyletters(s string) string {
 	res := ""
 	for _, rune := range s {
-		if rune==' ' || (unicode.IsLetter(rune) && rune < unicode.MaxASCII) {
+		if rune == ' ' || (unicode.IsLetter(rune) && rune < unicode.MaxASCII) {
 			res += string(rune)
 		} else {
 			res += string('X')
@@ -125,9 +125,9 @@ func ToWRFDA(obs sensor.Observation) string {
 			dataQCError(num(obs.Metric.TempAvg, 12.3)) +
 			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
 			space(11) +
-			dataQCError(num(obs.HumidityAvg, 12.3)) +
+			dataQCError(num(obs.HumidityAvg, 12.3)) /*+
 			dataQCError(num(sensor.Value(math.NaN()), 12.3)) +
-			dataQCError(num(sensor.Value(math.NaN()), 12.3))
+			dataQCError(num(sensor.Value(math.NaN()), 12.3))*/
 
 	return firstLine + "\n" + secondLine + "\n" + thirstLine
 }
