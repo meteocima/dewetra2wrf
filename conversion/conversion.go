@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/meteocima/wund-to-ascii/sensor"
 )
@@ -70,6 +71,18 @@ func dataQCError3(data string) string {
 		num(ERROR, 7.3)
 }
 
+func onlyletters(s string) string {
+	res := ""
+	for _, rune := range s {
+		if unicode.IsLetter(rune) && rune < unicode.MaxASCII {
+			res += string(rune)
+		} else {
+			res += string('X')
+		}
+	}
+	return res
+}
+
 //INFO  = PLATFORM, DATE, NAME, LEVELS, LATITUDE, LONGITUDE, ELEVATION, ID.
 //SRFC  = SLP, PW (DATA,QC,ERROR).
 //EACH  = PRES, SPEED, DIR, HEIGHT, TEMP, DEW PT, HUMID (DATA,QC,ERROR)*LEVELS.
@@ -84,7 +97,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			" " +
 			date(obs.ObsTimeUtc) +
 			" " +
-			str("XXXXXX", 40) +
+			str(onlyletters(obs.StationName), 40) +
 			" " +
 			integer(1, 6) +
 			num(sensor.Value(obs.Lat), 12.3) +
@@ -94,7 +107,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			num(sensor.Value(obs.Elevation), 12.3) +
 			space(11) +
 			space(6) +
-			str("XXXXXX", 40)
+			str(obs.StationID, 40)
 
 	surfaceLevelPressure := sensor.Value(math.NaN())
 	precipTotal := sensor.Value(math.NaN()) // obs.Metric.PrecipTotal
