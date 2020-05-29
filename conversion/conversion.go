@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -95,11 +96,12 @@ func ToWRFDA(obs sensor.Observation) string {
 			space(6) +
 			str("XXXXXX", 40)
 
-	surfaceLevelPressure := sensor.Value(0.0)
+	surfaceLevelPressure := sensor.Value(math.NaN())
+	precipTotal := sensor.Value(math.NaN()) // obs.Metric.PrecipTotal
 
 	secondLine :=
 		dataQCError(num(surfaceLevelPressure, 12.3)) +
-			dataQCError3(num(obs.Metric.PrecipTotal, 12.3))
+			dataQCError3(num(precipTotal, 12.3))
 
 	thirstLine :=
 		dataQCError(num(obs.Metric.Pressure, 12.3)) +
@@ -111,8 +113,8 @@ func ToWRFDA(obs sensor.Observation) string {
 			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
 			space(11) +
 			dataQCError(num(obs.HumidityAvg, 12.3)) +
-			dataQCError(num(0.0, 12.3)) +
-			dataQCError(num(0.0, 12.3))
+			dataQCError(num(sensor.Value(math.NaN()), 12.3)) +
+			dataQCError(num(sensor.Value(math.NaN()), 12.3))
 
 	return firstLine + "\n" + secondLine + "\n" + thirstLine
 }
