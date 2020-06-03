@@ -295,7 +295,8 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 			currentObs.Metric.Pressure = pressureItem.SensorValue()
 			pressureIdx++
 		} else {
-			currentObs.Metric.Pressure = 1130.1898
+
+			currentObs.Metric.Pressure = standardAtmosphere(station.Elevation)
 		}
 
 		// formula for dewpoint calculation must be applied with
@@ -314,6 +315,36 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 	}
 
 	return results, nil
+}
+
+type standardPressure struct {
+	altMin, altMax           float64
+	pressureMin, pressureMax float64
+}
+
+var standardValues = []standardPressure{
+	standardPressure{0, 1000, 101325, 89876},
+	standardPressure{1000, 5000, 89876, 54048},
+	standardPressure{5000, 10000, 54048, 26500},
+	standardPressure{10000, 15000, 26500, 12111},
+	standardPressure{15000, 20000, 12111, 5469},
+	standardPressure{20000, 25000, 5469, 2549},
+	standardPressure{25000, math.NaN(), 2549, math.NaN()},
+}
+
+func standardAtmosphere(elevation float64) sensor.Value {
+	var level standardPressure
+	for _, level = range standardValues {
+		if level.altMin <= elevation && (math.IsNaN(level.altMax) || level.altMax > elevation) {
+			break
+		}
+	}
+	x0, x1 := level.altMin, level.altMax
+	y0, y1 := level.pressureMin, level.pressureMax
+
+	result := y0 + (elevation-x0)*(y1-y0)/(x1-x0)
+
+	return sensor.Value(result)
 }
 
 func downloadRelativeHumidity(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
