@@ -71,8 +71,13 @@ func dataQCError(data string) string {
 }
 
 func dataQCError3(data string) string {
+	qc := QC
+	if strings.Contains(data, "-888") {
+		qc = -88
+	}
+
 	return data +
-		integer(QC, 4) +
+		integer(qc, 4) +
 		num(ERROR, 7.3)
 }
 
