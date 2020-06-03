@@ -344,7 +344,7 @@ func standardAtmosphere(elevation float64) sensor.Value {
 
 	result := y0 + (elevation-x0)*(y1-y0)/(x1-x0)
 
-	return sensor.Value(result)
+	return sensor.Value(result / 100)
 }
 
 func downloadRelativeHumidity(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
