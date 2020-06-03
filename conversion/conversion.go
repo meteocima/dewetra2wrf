@@ -133,7 +133,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			space(11) +
 			dataQCError(num(sensor.Value(obs.Elevation), 12.3)) +
 			dataQCError(num(obs.Metric.TempAvg, 12.3)) +
-			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
+			dataQCError(num( /*obs.Metric.DewptAvg*/ sensor.NaN(), 12.3)) +
 			space(11) +
 			dataQCError(num(obs.HumidityAvg, 12.3)) /*+
 			dataQCError(num(sensor.Value(math.NaN()), 12.3)) +

@@ -58,6 +58,10 @@ func (data Value) IsNaN() bool {
 	return math.IsNaN(float64(data))
 }
 
+func NaN() Value {
+	return Value(math.NaN())
+}
+
 // MarshalJSON is
 func (data Value) MarshalJSON() ([]byte, error) {
 	if math.IsNaN(float64(data)) {
