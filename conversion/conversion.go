@@ -17,7 +17,7 @@ import (
 const QC = 0
 
 // ERROR is
-const ERROR = 9999.99
+const ERROR = 99.99
 
 func skipLines(reader *bufio.Reader, n int) {
 	for i := 0; i < n; i++ {
