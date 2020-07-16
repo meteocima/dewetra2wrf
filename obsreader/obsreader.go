@@ -1,7 +1,6 @@
-package download
+package obsreader
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,15 +8,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"time"
 
 	"github.com/meteocima/wund-to-ascii/sensor"
 )
-
-const baseURL = "http://dds.cimafoundation.org/dds/rest"
-const username = "admin"
-const password = "geoDDS2013"
 
 /*
 
@@ -97,87 +93,44 @@ func (bn byName) Swap(i, j int) {
 	bn.ids[j] = save
 }
 
-func getSensorsIds(dataPath string, domain sensor.Domain, sensorClass string) ([]string, error) {
-	sensorsTable := map[string]sensorAnag{}
-	err := fillSensorsMap(dataPath, sensorClass, sensorsTable)
-	if err != nil {
-		return nil, err
-	}
-
-	ids := []string{}
-	for _, sens := range sensorsTable {
-		if sens.Lat >= domain.MinLat && sens.Lat <= domain.MaxLat &&
-			sens.Lon >= domain.MinLon && sens.Lon <= domain.MaxLon {
-			ids = append(ids, sens.ID)
-		}
-	}
-
-	sort.Sort(byName{ids, sensorsTable})
-
-	return ids, nil
-}
-
 // AllSensors is
 func AllSensors(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
-	ids, err := getSensorsIds(dataPath, domain, "IGROMETRO")
-	if err != nil {
-		return nil, err
-	}
-	relativeHumidity, err := downloadRelativeHumidity(dataPath, ids, date)
+
+	relativeHumidity, err := readRelativeHumidity(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, domain, "TERMOMETRO")
-	if err != nil {
-		return nil, err
-	}
-	temperature, err := downloadTemperature(dataPath, ids, date)
+	temperature, err := readTemperature(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, domain, "DIREZIONEVENTO")
-	if err != nil {
-		return nil, err
-	}
-	windDirection, err := downloadWindDirection(dataPath, ids, date)
+	windDirection, err := readWindDirection(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, domain, "ANEMOMETRO")
-	if err != nil {
-		return nil, err
-	}
-	windSpeed, err := downloadWindSpeed(dataPath, ids, date)
+	windSpeed, err := readWindSpeed(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, domain, "PLUVIOMETRO")
-	if err != nil {
-		return nil, err
-	}
-	precipitableWater, err := downloadPrecipitableWater(dataPath, ids, date)
+	precipitableWater, err := readPrecipitableWater(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
 
-	ids, err = getSensorsIds(dataPath, domain, "BAROMETRO")
-	if err != nil {
-		return nil, err
-	}
-	pressure, err := downloadPressure(dataPath, ids, date)
+	pressure, err := readPressure(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
 
-	return MatchDownloadedData(dataPath, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
+	return MergeObservations(dataPath, domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }
 
-// MatchDownloadedData is
-func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error) {
+// MergeObservations is
+func MergeObservations(dataPath string, domain sensor.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error) {
 	pressureIdx := 0
 	relativeHumidityIdx := 0
 	temperatureIdx := 0
@@ -187,7 +140,7 @@ func MatchDownloadedData(dataPath string, pressure, relativeHumidity, temperatur
 
 	results := []sensor.Observation{}
 
-	sensorsTable, err := openCompleteSensorsMap(dataPath)
+	sensorsTable, err := openCompleteSensorsMap(dataPath, domain)
 	if err != nil {
 		return nil, err
 	}
@@ -347,71 +300,36 @@ func standardAtmosphere(elevation float64) sensor.Value {
 	return sensor.Value(result / 100)
 }
 
-func downloadRelativeHumidity(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "IGROMETRO", ids, date)
+func readRelativeHumidity(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+	return readDewetraSensor(dataPath, domain, "IGROMETRO", date)
 }
 
-func downloadTemperature(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "TERMOMETRO", ids, date)
+func readTemperature(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+	return readDewetraSensor(dataPath, domain, "TERMOMETRO", date)
 }
 
-func downloadWindDirection(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "DIREZIONEVENTO", ids, date)
+func readWindDirection(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+	return readDewetraSensor(dataPath, domain, "DIREZIONEVENTO", date)
 }
 
-func downloadWindSpeed(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "ANEMOMETRO", ids, date)
+func readWindSpeed(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+	return readDewetraSensor(dataPath, domain, "ANEMOMETRO", date)
 }
 
-func downloadPrecipitableWater(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "PLUVIOMETRO", ids, date)
+func readPrecipitableWater(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+	return readDewetraSensor(dataPath, domain, "PLUVIOMETRO", date)
 }
 
-func downloadPressure(dataPath string, ids []string, date time.Time) ([]sensor.Result, error) {
-	return downloadDewetraSensor(dataPath, "BAROMETRO", ids, date)
+func readPressure(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+	return readDewetraSensor(dataPath, domain, "BAROMETRO", date)
 }
 
-func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, date time.Time) ([]sensor.Result, error) {
-	url := fmt.Sprintf("%s/drops_sensors/serie", baseURL)
+func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string, date time.Time) ([]sensor.Result, error) {
 
-	dateFrom := date.Add(-time.Minute * 30)
-	dateTo := date.Add(time.Minute * 30)
-
-	sensorReq := sensorReqBody{
-		SensorClass: sensorClass,
-		From:        dateFrom.Format("200601021504"),
-		To:          dateTo.Format("200601021504"),
-		Ids:         ids,
-	}
-
-	reqBody, err := json.Marshal(sensorReq)
+	content, err := ioutil.ReadFile(filepath.Join(dataPath, sensorClass+".json"))
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewReader(reqBody))
-	if err != nil {
-		return nil, err
-	}
-	req.SetBasicAuth(username, password)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{}
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("HTTP response %d", res.StatusCode)
-	}
-
-	content, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
 	sensorObservations := []sensor.Result{}
 	observationLess := func(i, j int) bool {
 		if sensorObservations[i].SortKey == sensorObservations[j].SortKey {
@@ -427,7 +345,7 @@ func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, da
 		return nil, err
 	}
 
-	sensorsTable, err := openSensorsMap(dataPath, sensorClass)
+	sensorsTable, err := openSensorsMap(dataPath, domain, sensorClass)
 	if err != nil {
 		return nil, err
 	}
@@ -476,10 +394,10 @@ func downloadDewetraSensor(dataPath string, sensorClass string, ids []string, da
 	return sensorObservations, nil
 }
 
-func openSensorsMap(dataPath string, sensorClass string) (map[string]sensorAnag, error) {
+func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
 
-	err := fillSensorsMap(dataPath, sensorClass, sensorsTable)
+	err := fillSensorsMap(dataPath, domain, sensorClass, sensorsTable)
 	if err != nil {
 		return nil, err
 	}
@@ -555,7 +473,7 @@ func saveElevationsToFile(dataPath string, elevations map[string]float64) error 
 
 }
 
-func fillSensorsMap(dataPath string /*, domain sensor.Domain*/, sensorClass string, sensorsTable map[string]sensorAnag) error {
+func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {
 	sensorsAnag := []sensorAnag{}
 	///*testutil.FixtureDir(".."),*/ "../data"
 	sensorsAnagContent, err := ioutil.ReadFile(path.Join(dataPath, sensorClass+".json"))
@@ -591,105 +509,45 @@ func fillSensorsMap(dataPath string /*, domain sensor.Domain*/, sensorClass stri
 		}
 
 		sensor.Elevation = elevation
-		sensorsTable[sensor.ID] = sensor
+		if sensor.Lat >= domain.MinLat && sensor.Lat <= domain.MaxLat &&
+			sensor.Lon >= domain.MinLon && sensor.Lon <= domain.MaxLon {
+			sensorsTable[sensor.ID] = sensor
+
+		}
 	}
 
 	return nil
 }
 
-func DownloadAllSensorsTables(dataPath string, collection sensor.Collection) error {
-	err := downloadSensorsTable(dataPath, collection, "IGROMETRO")
-	if err != nil {
-		return err
-	}
-
-	err = downloadSensorsTable(dataPath, collection, "TERMOMETRO")
-	if err != nil {
-		return err
-	}
-
-	err = downloadSensorsTable(dataPath, collection, "DIREZIONEVENTO")
-	if err != nil {
-		return err
-	}
-
-	err = downloadSensorsTable(dataPath, collection, "ANEMOMETRO")
-	if err != nil {
-		return err
-	}
-
-	err = downloadSensorsTable(dataPath, collection, "PLUVIOMETRO")
-	if err != nil {
-		return err
-	}
-
-	err = downloadSensorsTable(dataPath, collection, "BAROMETRO")
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func downloadSensorsTable(dataPath string, collection sensor.Collection, sensorClass string) error {
-	url := fmt.Sprintf("%s/drops_sensors/anag/%s/%s", baseURL, sensorClass, collection.Key())
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return err
-	}
-	req.SetBasicAuth(username, password)
-
-	client := http.Client{}
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		return fmt.Errorf("HTTP response %d", res.StatusCode)
-	}
-
-	content, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	filename := fmt.Sprintf("%s/%s.json", dataPath, sensorClass)
-	return ioutil.WriteFile(filename, content, os.FileMode(0644))
-
-}
-
-func openCompleteSensorsMap(dataPath string) (map[string]sensorAnag, error) {
+func openCompleteSensorsMap(dataPath string, domain sensor.Domain) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
 
-	err := fillSensorsMap(dataPath, "IGROMETRO", sensorsTable)
+	err := fillSensorsMap(dataPath, domain, "IGROMETRO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}
 
-	err = fillSensorsMap(dataPath, "TERMOMETRO", sensorsTable)
+	err = fillSensorsMap(dataPath, domain, "TERMOMETRO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}
 
-	err = fillSensorsMap(dataPath, "DIREZIONEVENTO", sensorsTable)
+	err = fillSensorsMap(dataPath, domain, "DIREZIONEVENTO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}
 
-	err = fillSensorsMap(dataPath, "ANEMOMETRO", sensorsTable)
+	err = fillSensorsMap(dataPath, domain, "ANEMOMETRO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}
 
-	err = fillSensorsMap(dataPath, "PLUVIOMETRO", sensorsTable)
+	err = fillSensorsMap(dataPath, domain, "PLUVIOMETRO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}
 
-	err = fillSensorsMap(dataPath, "BAROMETRO", sensorsTable)
+	err = fillSensorsMap(dataPath, domain, "BAROMETRO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}

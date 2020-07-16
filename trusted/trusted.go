@@ -10,7 +10,7 @@ import (
 	"github.com/meteocima/wund-to-ascii/conversion"
 	"github.com/meteocima/wund-to-ascii/sensor"
 
-	"github.com/meteocima/wund-to-ascii/download"
+	"github.com/meteocima/wund-to-ascii/obsreader"
 )
 
 var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
@@ -36,9 +36,8 @@ var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"#------------------------------------------------------------------------------#\n"
 
 func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, filename string) error {
-	download.DownloadAllSensorsTables(dataPath, sensor.DPCTrusted)
 
-	sensorsObservations, err := download.AllSensors(dataPath, domain, date)
+	sensorsObservations, err := obsreader.AllSensors(dataPath, domain, date)
 	if err != nil {
 		return err
 	}

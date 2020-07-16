@@ -9,9 +9,11 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${fileDirname}",
+      "program": "/home/parroit/cimarepos/wund2dewetra/mod.go",
       "env": {},
-      "args": ["2020052500"]
+      "args": [
+        "/home/parroit/cimarepos/wund2dewetra/fixtures/20191122/IABRUZZO100.json"
+      ]
     }
   ]
 }

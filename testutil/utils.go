@@ -57,7 +57,7 @@ func SaveResultsFile(t *testing.T, name string, results interface{}) {
 	assert.NoError(t, err)
 }
 
-type Matcher func(dataPath string, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error)
+type Matcher func(dataPath string, domain sensor.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error)
 
 // AllSensorsFromFixture is
 func AllSensorsFromFixture(t *testing.T, dataPath string, matchDownloadedData Matcher) ([]sensor.Observation, error) {
@@ -67,5 +67,5 @@ func AllSensorsFromFixture(t *testing.T, dataPath string, matchDownloadedData Ma
 	windSpeed := GetResultsFile(t, "ANEMOMETRO.json")
 	windDirection := GetResultsFile(t, "DIREZIONEVENTO.json")
 	temperature := GetResultsFile(t, "TERMOMETRO.json")
-	return matchDownloadedData(dataPath, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
+	return matchDownloadedData(dataPath, sensor.Domain{MinLat: 34, MinLon: 4, MaxLat: 47, MaxLon: 20}, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }
