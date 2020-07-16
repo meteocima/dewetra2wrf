@@ -26,7 +26,6 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-wund-to-ascii
+dewetra2wrf
 
 fixtures/obs_gts_2014-10-09_00:00:00.3DVAR
-

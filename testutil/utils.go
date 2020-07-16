@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/meteocima/wund-to-ascii/sensor"
+	"github.com/meteocima/dewetra2wrf/sensor"
 	"github.com/stretchr/testify/assert"
 )
 

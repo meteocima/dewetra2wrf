@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/meteocima/wund-to-ascii/trusted"
+	"github.com/meteocima/dewetra2wrf/trusted"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	data := "/var/local/wund-to-ascii"
+	data := "/var/local/dewetra2wrf"
 
 	err = trusted.Get(data, path.Join(data, "ob.ascii"), date)
 

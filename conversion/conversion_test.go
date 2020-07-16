@@ -3,9 +3,9 @@ package conversion
 import (
 	"testing"
 
-	"github.com/meteocima/wund-to-ascii/obsreader"
+	"github.com/meteocima/dewetra2wrf/obsreader"
 
-	"github.com/meteocima/wund-to-ascii/testutil"
+	"github.com/meteocima/dewetra2wrf/testutil"
 	"github.com/stretchr/testify/assert"
 )
 

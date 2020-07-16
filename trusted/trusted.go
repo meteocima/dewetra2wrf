@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/meteocima/wund-to-ascii/conversion"
-	"github.com/meteocima/wund-to-ascii/sensor"
+	"github.com/meteocima/dewetra2wrf/conversion"
+	"github.com/meteocima/dewetra2wrf/sensor"
 
-	"github.com/meteocima/wund-to-ascii/obsreader"
+	"github.com/meteocima/dewetra2wrf/obsreader"
 )
 
 var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
@@ -56,7 +56,7 @@ func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, f
 }
 
 func Get(dataDir string, outputFile string, date time.Time) error {
-	data := "/var/local/wund-to-ascii"
+	data := "/var/local/dewetra2wrf"
 	err := os.MkdirAll(data, os.FileMode(0755))
 	if err != nil && !os.IsExist(err) {
 		return err

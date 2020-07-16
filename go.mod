@@ -1,4 +1,4 @@
-module github.com/meteocima/wund-to-ascii
+module github.com/meteocima/dewetra2wrf
 
 go 1.14
 

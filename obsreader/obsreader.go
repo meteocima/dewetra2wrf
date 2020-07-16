@@ -12,7 +12,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/meteocima/wund-to-ascii/sensor"
+	"github.com/meteocima/dewetra2wrf/sensor"
 )
 
 /*
