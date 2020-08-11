@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -55,10 +56,30 @@ func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, f
 
 }
 
-func Get(dataDir string, outputFile string, date time.Time) error {
-	data := "/var/local/dewetra2wrf"
+func Get(data string, outputFile string, domain string, date time.Time) error {
 	err := os.MkdirAll(data, os.FileMode(0755))
 	if err != nil && !os.IsExist(err) {
+		return err
+	}
+	coords := strings.Split(domain, ",")
+
+	MinLat, err := strconv.ParseFloat(coords[0], 64)
+	if err != nil {
+		return err
+	}
+
+	MaxLat, err := strconv.ParseFloat(coords[1], 64)
+	if err != nil {
+		return err
+	}
+
+	MinLon, err := strconv.ParseFloat(coords[2], 64)
+	if err != nil {
+		return err
+	}
+
+	MaxLon, err := strconv.ParseFloat(coords[3], 64)
+	if err != nil {
 		return err
 	}
 
@@ -66,8 +87,12 @@ func Get(dataDir string, outputFile string, date time.Time) error {
 		data,
 		//
 		// leftlon, rightlon, toplat, bottomlat
-		// -19.0, 48.0, 64.0, 24.0
-		sensor.Domain{MinLat: 24, MinLon: -19, MaxLat: 64, MaxLon: 48},
+		sensor.Domain{
+			MinLat: MinLat,
+			MinLon: MinLon,
+			MaxLat: MaxLat,
+			MaxLon: MaxLon,
+		},
 		date,
 
 		outputFile,
