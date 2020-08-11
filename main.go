@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +13,8 @@ import (
 )
 
 func main() {
-	//outdir := flag.String("outdir", ".", "where to save downloaded files")
+	input := flag.String("input", ".", "where to read input files")
+	outfile := flag.String("outfile", "./out", "where to save converted file")
 	domainS := flag.String("domain", "", "domain to filter stations to download [MinLat,MaxLat,MinLon,MaxLon]")
 	dateS := flag.String("date", "", "date and hour of the data to download [YYYYMMDDHH]")
 
@@ -44,9 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	data := "/var/local/dewetra2wrf"
-
-	err = trusted.Get(data, path.Join(data, "ob.ascii"), date)
+	err = trusted.Get(*input, *outfile, date)
 
 	if err != nil {
 		log.Fatal(err)

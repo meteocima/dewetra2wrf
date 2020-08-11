@@ -32,7 +32,7 @@ func MustParse(dateS string) time.Time {
 }
 
 func MustParseISO(dateS string) time.Time {
-	dt, err := time.Parse(time.RFC3339, dateS)
+	dt, err := time.Parse("02/01/2006 15", dateS)
 	if err != nil {
 		panic(err)
 	}

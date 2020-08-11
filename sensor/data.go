@@ -18,20 +18,6 @@ const (
 	DPCTrusted
 )
 
-// Key return the key that identifies this collection
-// in DDS urls
-func (coll Collection) Key() string {
-	if coll == Wunderground {
-		return ""
-	}
-
-	if coll == DPCTrusted {
-		return "Dewetra%25Default"
-	}
-
-	panic("Unknown collection")
-}
-
 // Result represent a sensor value at a point in time
 type Result struct {
 	SortKey string
