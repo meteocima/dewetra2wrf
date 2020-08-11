@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/meteocima/dewetra2wrf/trusted"
@@ -25,18 +23,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	parts := strings.Split(*domainS, ",")
-	numParts := make([]float64, 4)
-	for i := 0; i < 4; i++ {
-		n, err := strconv.ParseFloat(parts[i], 64)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-			flag.Usage()
-			os.Exit(1)
-		}
-		numParts[i] = n
-	}
-
 	date, err := time.Parse("2006010215", *dateS)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
@@ -44,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = trusted.Get(*input, *outfile, date)
+	err = trusted.Get(*input, *outfile, *domainS, date)
 
 	if err != nil {
 		log.Fatal(err)
