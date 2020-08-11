@@ -83,6 +83,13 @@ func Get(data string, outputFile string, domain string, date time.Time) error {
 		return err
 	}
 
+	fmt.Printf("MinLat: %f\nMinLon: %f\nMaxLat: %f\nMaxLon: %f\n",
+		MinLat,
+		MinLon,
+		MaxLat,
+		MaxLon,
+	)
+
 	return DownloadAndConvert(
 		data,
 		//
