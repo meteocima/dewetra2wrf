@@ -50,6 +50,12 @@ type sensorAnag struct {
 }
 
 func observationIsLess(this, that sensor.Result) bool {
+	if that.SortKey == "zzzzzzzzzzzz" {
+		return true
+	}
+	if this.SortKey == "zzzzzzzzzzzz" {
+		return false
+	}
 	if this.SortKey == that.SortKey {
 		return this.At.Unix() < that.At.Unix()
 	}
@@ -57,7 +63,7 @@ func observationIsLess(this, that sensor.Result) bool {
 }
 
 func minObservation(results ...sensor.Result) sensor.Result {
-	min := sensor.Result{SortKey: "zzzzzzzzzzzzzzzzzzzzzzzzz"}
+	min := sensor.Result{SortKey: "zzzzzzzzzzzz"}
 	for _, result := range results {
 		if observationIsLess(result, min) {
 			min = result
@@ -148,50 +154,50 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 		if len(pressure) > pressureIdx {
 			pressureItem = pressure[pressureIdx]
 		} else {
-			pressureItem.SortKey = "zzzzzzzzzz"
+			pressureItem.SortKey = "zzzzzzzzzzzz"
 		}
 
 		var relativeHumidityItem sensor.Result
 		if len(relativeHumidity) > relativeHumidityIdx {
 			relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
 		} else {
-			relativeHumidityItem.SortKey = "zzzzzzzzzz"
+			relativeHumidityItem.SortKey = "zzzzzzzzzzzz"
 		}
 
 		var temperatureItem sensor.Result
 		if len(temperature) > temperatureIdx {
 			temperatureItem = temperature[temperatureIdx]
 		} else {
-			temperatureItem.SortKey = "zzzzzzzzzz"
+			temperatureItem.SortKey = "zzzzzzzzzzzz"
 		}
 
 		var windDirectionItem sensor.Result
 		if len(windDirection) > windDirectionIdx {
 			windDirectionItem = windDirection[windDirectionIdx]
 		} else {
-			windDirectionItem.SortKey = "zzzzzzzzzz"
+			windDirectionItem.SortKey = "zzzzzzzzzzzz"
 		}
 
 		var windSpeedItem sensor.Result
 		if len(windSpeed) > windSpeedIdx {
 			windSpeedItem = windSpeed[windSpeedIdx]
 		} else {
-			windSpeedItem.SortKey = "zzzzzzzzzz"
+			windSpeedItem.SortKey = "zzzzzzzzzzzz"
 		}
 
 		var precipitableWaterItem sensor.Result
 		if len(precipitableWater) > precipitableWaterIdx {
 			precipitableWaterItem = precipitableWater[precipitableWaterIdx]
 		} else {
-			precipitableWaterItem.SortKey = "zzzzzzzzzz"
+			precipitableWaterItem.SortKey = "zzzzzzzzzzzz"
 		}
 
-		if relativeHumidityItem.SortKey == "zzzzzzzzzz" &&
-			temperatureItem.SortKey == "zzzzzzzzzz" &&
-			windDirectionItem.SortKey == "zzzzzzzzzz" &&
-			windSpeedItem.SortKey == "zzzzzzzzzz" &&
-			precipitableWaterItem.SortKey == "zzzzzzzzzz" &&
-			pressureItem.SortKey == "zzzzzzzzzz" {
+		if relativeHumidityItem.SortKey == "zzzzzzzzzzzz" &&
+			temperatureItem.SortKey == "zzzzzzzzzzzz" &&
+			windDirectionItem.SortKey == "zzzzzzzzzzzz" &&
+			windSpeedItem.SortKey == "zzzzzzzzzzzz" &&
+			precipitableWaterItem.SortKey == "zzzzzzzzzzzz" &&
+			pressureItem.SortKey == "zzzzzzzzzzzz" {
 			break
 		}
 

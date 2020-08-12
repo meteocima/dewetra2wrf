@@ -37,6 +37,11 @@ var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"#------------------------------------------------------------------------------#\n"
 
 func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, filename string) error {
+	/*
+		AllSensors returns a chan of sensors read. the sensors variables are emitted in to the chan as soon as
+		all sensor variables are read, and written in the out file at abs locations.
+		An init function previously calculate the position of every sensor variable in the file.
+	*/
 
 	sensorsObservations, err := obsreader.AllSensors(dataPath, domain, date)
 	if err != nil {
