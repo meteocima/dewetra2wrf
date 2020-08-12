@@ -273,13 +273,13 @@ type standardPressure struct {
 }
 
 var standardValues = []standardPressure{
-	standardPressure{0, 1000, 101325, 89876},
-	standardPressure{1000, 5000, 89876, 54048},
-	standardPressure{5000, 10000, 54048, 26500},
-	standardPressure{10000, 15000, 26500, 12111},
-	standardPressure{15000, 20000, 12111, 5469},
-	standardPressure{20000, 25000, 5469, 2549},
-	standardPressure{25000, math.NaN(), 2549, math.NaN()},
+	{0, 1000, 101325, 89876},
+	{1000, 5000, 89876, 54048},
+	{5000, 10000, 54048, 26500},
+	{10000, 15000, 26500, 12111},
+	{15000, 20000, 12111, 5469},
+	{20000, 25000, 5469, 2549},
+	{25000, math.NaN(), 2549, math.NaN()},
 }
 
 func standardAtmosphere(elevation float64) sensor.Value {
