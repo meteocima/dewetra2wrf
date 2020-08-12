@@ -57,10 +57,7 @@ func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, f
 }
 
 func Get(data string, outputFile string, domain string, date time.Time) error {
-	err := os.MkdirAll(data, os.FileMode(0755))
-	if err != nil && !os.IsExist(err) {
-		return err
-	}
+
 	coords := strings.Split(domain, ",")
 
 	MinLat, err := strconv.ParseFloat(coords[0], 64)

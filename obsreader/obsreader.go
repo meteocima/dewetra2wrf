@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
-	"net/http"
-	"os"
 	"path"
 	"path/filepath"
 	"sort"
@@ -146,7 +144,6 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 	}
 
 	for {
-
 		var pressureItem sensor.Result
 		if len(pressure) > pressureIdx {
 			pressureItem = pressure[pressureIdx]
@@ -405,6 +402,7 @@ func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (
 	return sensorsTable, nil
 }
 
+/*
 func getElevation(sensor sensorAnag) (float64, error) {
 	url := fmt.Sprintf("https://api.airmap.com/elevation/v1/ele/?points=%6f,%6f", sensor.Lat, sensor.Lon)
 	req, err := http.NewRequest("GET", url, nil)
@@ -442,7 +440,8 @@ func getElevation(sensor sensorAnag) (float64, error) {
 
 	return data.Data[0], nil
 }
-
+*/
+/*
 func readElevationsFromFile(dataPath string) (map[string]float64, error) {
 	elevFile := path.Join(dataPath, "elevations.json")
 	elevations := map[string]float64{}
@@ -461,7 +460,8 @@ func readElevationsFromFile(dataPath string) (map[string]float64, error) {
 
 	return elevations, nil
 }
-
+*/
+/*
 func saveElevationsToFile(dataPath string, elevations map[string]float64) error {
 	buff, err := json.MarshalIndent(elevations, " ", " ")
 	if err != nil {
@@ -472,11 +472,43 @@ func saveElevationsToFile(dataPath string, elevations map[string]float64) error 
 	return ioutil.WriteFile(elevFile, buff, os.FileMode(0644))
 
 }
+*/
+
+type elevationsFile struct {
+	xs, ys []float64
+	zs     []int32
+}
+
+func openElevationsFile(dirname string) (*elevationsFile, error) {
+
+	orog := "/usr/local/dewetra2wrf/orog.nc"
+	elev := &elevationsFile{}
+	f := File{}
+	f.Open(orog)
+	defer f.Close()
+	x := f.Var("x")
+	y := f.Var("y")
+	z := f.Var("z")
+
+	elev.xs = x.ValuesFloat64()
+	elev.ys = y.ValuesFloat64()
+	elev.zs = z.ValuesInt32()
+
+	return elev, f.Error()
+
+}
+
+func (file *elevationsFile) getElevation(lat, lon float64) float64 {
+	xpos := int((0.5 + lat/360) * float64(len(file.xs)))
+	ypos := int((0.5 + lon/180) * float64(len(file.ys)))
+
+	return float64(file.zs[xpos+ypos*len(file.xs)])
+}
 
 func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {
 	sensorsAnag := []sensorAnag{}
 	///*testutil.FixtureDir(".."),*/ "../data"
-	sensorsAnagContent, err := ioutil.ReadFile(path.Join(dataPath, sensorClass+".json"))
+	sensorsAnagContent, err := ioutil.ReadFile(path.Join(dataPath, sensorClass+"-registry.json"))
 	if err != nil {
 		return err
 	}
@@ -486,31 +518,15 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 		return err
 	}
 
-	elevations, err := readElevationsFromFile(dataPath)
+	elevations, err := openElevationsFile(dataPath)
 	if err != nil {
 		return err
 	}
 
-	for n, sensor := range sensorsAnag {
-		stKey := fmt.Sprintf("%f:%f", sensor.Lat, sensor.Lon)
-		elevation, ok := elevations[stKey]
-		if !ok {
-			fmt.Println(n, stKey)
-			elevation, err := getElevation(sensor)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			elevations[stKey] = elevation
-			err = saveElevationsToFile(dataPath, elevations)
-			if err != nil {
-				return err
-			}
-		}
-
-		sensor.Elevation = elevation
+	for _, sensor := range sensorsAnag {
 		if sensor.Lat >= domain.MinLat && sensor.Lat <= domain.MaxLat &&
 			sensor.Lon >= domain.MinLon && sensor.Lon <= domain.MaxLon {
+			sensor.Elevation = elevations.getElevation(sensor.Lat, sensor.Lon)
 			sensorsTable[sensor.ID] = sensor
 
 		}
