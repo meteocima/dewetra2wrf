@@ -204,7 +204,7 @@ func (data *File) AllAttribs() map[string]string {
 // Var ...
 func (data *File) Var(name string) *Variable {
 	if data.err != nil {
-		return nil
+		return &Variable{}
 	}
 	if data.vars == nil {
 		data.vars = Vars{}
@@ -215,7 +215,7 @@ func (data *File) Var(name string) *Variable {
 
 	if data.ds == nil {
 		data.err = fmt.Errorf("No file opened")
-		return nil
+		return &Variable{}
 	}
 
 	res := Variable{
@@ -225,20 +225,20 @@ func (data *File) Var(name string) *Variable {
 
 	res.variable, data.err = data.ds.Var(name)
 	if data.err != nil {
-		return nil
+		return &Variable{}
 	}
 
 	var t netcdf.Type
 	t, data.err = res.variable.Type()
 	if data.err != nil {
-		return nil
+		return &Variable{}
 	}
 
 	res.Type = t.String()
 
 	res.Len, data.err = res.variable.Len()
 	if data.err != nil {
-		return nil
+		return &Variable{}
 	}
 	data.vars[res.Name] = &res
 	return &res
