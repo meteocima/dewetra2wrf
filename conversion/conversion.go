@@ -124,7 +124,7 @@ func ToWRFDA(obs sensor.Observation) string {
 			dataQCError3(num(precipTotal, 12.3), 99.99)
 
 	thirstLine :=
-		dataQCError(num(obs.Metric.Pressure, 12.3), 99.99) +
+		dataQCError(num(obs.Metric.Pressure, 12.3), 1.0) +
 			dataQCError(num(obs.Metric.WindspeedAvg, 12.3), 1.0) +
 			dataQCError(num(obs.WinddirAvg, 12.3), 1.0) +
 			space(11) +
