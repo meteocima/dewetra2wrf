@@ -16,9 +16,6 @@ import (
 // QC is
 const QC = 0
 
-// ERROR is
-const ERROR = 99.99
-
 func skipLines(reader *bufio.Reader, n int) {
 	for i := 0; i < n; i++ {
 		_, err := reader.ReadString('\n')
@@ -59,7 +56,7 @@ func date(dt time.Time) string {
 	return dt.Format("2006-01-02_15:04:05")
 }
 
-func dataQCError(data string) string {
+func dataQCError(data string, err float64) string {
 	qc := QC
 	if strings.Contains(data, "-888") {
 		qc = -88
@@ -67,10 +64,10 @@ func dataQCError(data string) string {
 
 	return data +
 		integer(qc, 4) +
-		num(ERROR, 7.2)
+		num(sensor.Value(err), 7.2)
 }
 
-func dataQCError3(data string) string {
+func dataQCError3(data string, err float64) string {
 	qc := QC
 	if strings.Contains(data, "-888") {
 		qc = -88
@@ -78,7 +75,7 @@ func dataQCError3(data string) string {
 
 	return data +
 		integer(qc, 4) +
-		num(ERROR, 7.3)
+		num(sensor.Value(err), 7.3)
 }
 
 func onlyletters(s string) string {
@@ -123,19 +120,19 @@ func ToWRFDA(obs sensor.Observation) string {
 	precipTotal := sensor.Value(math.NaN()) // obs.Metric.PrecipTotal
 
 	secondLine :=
-		dataQCError(num(surfaceLevelPressure, 12.3)) +
-			dataQCError3(num(precipTotal, 12.3))
+		dataQCError(num(surfaceLevelPressure, 12.3), 99.99) +
+			dataQCError3(num(precipTotal, 12.3), 99.99)
 
 	thirstLine :=
-		dataQCError(num(obs.Metric.Pressure, 12.3)) +
-			dataQCError(num(obs.Metric.WindspeedAvg, 12.3)) +
-			dataQCError(num(obs.WinddirAvg, 12.3)) +
+		dataQCError(num(obs.Metric.Pressure, 12.3), 99.99) +
+			dataQCError(num(obs.Metric.WindspeedAvg, 12.3), 1.0) +
+			dataQCError(num(obs.WinddirAvg, 12.3), 1.0) +
 			space(11) +
-			dataQCError(num(sensor.Value(obs.Elevation), 12.3)) +
-			dataQCError(num(obs.Metric.TempAvg, 12.3)) +
-			dataQCError(num(obs.Metric.DewptAvg, 12.3)) +
+			dataQCError(num(sensor.Value(obs.Elevation), 12.3), 999.99) +
+			dataQCError(num(obs.Metric.TempAvg, 12.3), 1.0) +
+			dataQCError(num(obs.Metric.DewptAvg, 12.3), 1.0) +
 			space(11) +
-			dataQCError(num(obs.HumidityAvg, 12.3)) /*+
+			dataQCError(num(obs.HumidityAvg, 12.3), 0.1) /*+
 			dataQCError(num(sensor.Value(math.NaN()), 12.3)) +
 			dataQCError(num(sensor.Value(math.NaN()), 12.3))*/
 
