@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -116,8 +115,8 @@ func ToWRFDA(obs sensor.Observation) string {
 			space(6) +
 			str(onlyletters(obs.StationID), 40)
 
-	surfaceLevelPressure := sensor.Value(math.NaN())
-	precipTotal := sensor.Value(math.NaN()) // obs.Metric.PrecipTotal
+	surfaceLevelPressure := sensor.NaN()
+	precipTotal := sensor.NaN() // obs.Metric.PrecipTotal
 
 	secondLine :=
 		dataQCError(num(surfaceLevelPressure, 12.3), 99.99) +
@@ -128,13 +127,14 @@ func ToWRFDA(obs sensor.Observation) string {
 			dataQCError(num(obs.Metric.WindspeedAvg, 12.3), 1.0) +
 			dataQCError(num(obs.WinddirAvg, 12.3), 1.0) +
 			space(11) +
-			dataQCError(num(sensor.Value(obs.Elevation), 12.3), 999.99) +
+			//dataQCError(num(sensor.Value(obs.Elevation), 12.3), 999.99) +
+			dataQCError(num(sensor.NaN(), 12.3), 999.99) +
 			dataQCError(num(obs.Metric.TempAvg, 12.3), 1.0) +
 			dataQCError(num(obs.Metric.DewptAvg, 12.3), 1.0) +
 			space(11) +
 			dataQCError(num(obs.HumidityAvg, 12.3), 0.1) /*+
-			dataQCError(num(sensor.Value(math.NaN()), 12.3)) +
-			dataQCError(num(sensor.Value(math.NaN()), 12.3))*/
+			dataQCError(num(sensor.NaN(), 12.3)) +
+			dataQCError(num(sensor.NaN(), 12.3))*/
 
 	return firstLine + "\n" + secondLine + "\n" + thirstLine
 }
