@@ -505,10 +505,11 @@ func openElevationsFile(dirname string) (*elevationsFile, error) {
 }
 
 func (file *elevationsFile) getElevation(lat, lon float64) float64 {
-	xpos := int((0.5 + lat/180) * float64(len(file.xs)))
-	ypos := int((0.5 + lon/360) * float64(len(file.ys)))
+	ypos := int((0.5 + lat/180) * float64(len(file.ys)))
+	xpos := int((0.5 + lon/360) * float64(len(file.xs)))
 
-	return float64(file.zs[xpos+ypos*len(file.xs)])
+	val := float64(file.zs[xpos+ypos*len(file.xs)])
+	return val
 }
 
 func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {

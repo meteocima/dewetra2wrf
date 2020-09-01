@@ -27,9 +27,13 @@ func skipLines(reader *bufio.Reader, n int) {
 	}
 }
 
-func str(s string, len int) string {
-	strFmt := fmt.Sprintf("%%-%ds", len)
-	return fmt.Sprintf(strFmt, s)
+func str(s string, ln int) string {
+	strFmt := fmt.Sprintf("%%-%ds", ln)
+	res := fmt.Sprintf(strFmt, s)
+	if len(res) <= 40 {
+		return res
+	}
+	return res[0:40]
 }
 
 func integer(i int, len int) string {
