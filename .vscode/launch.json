@@ -9,7 +9,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "/home/parroit/cimarepos/dewetra2wrf/main.go",
+      "program": "/home/parroit/Desktop/cimarepos/dewetra2wrf/main.go",
       "env": {},
       "args": [
         "-date",
