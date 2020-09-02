@@ -46,6 +46,7 @@ type sensorData struct {
 type sensorAnag struct {
 	ID                  string
 	StationName         string
+	SensorMU            string
 	Lon, Lat, Elevation float64
 }
 
@@ -238,8 +239,26 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 		}
 
 		if windSpeedItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
-			currentObs.Metric.WindspeedAvg = windSpeedItem.SensorValue()
+
+			var value sensor.Value
+
+			wsSensor, ok := sensorsTable[windSpeedItem.ID]
+			if !ok {
+				return nil, fmt.Errorf("Unknown sensor %s", windSpeedItem.ID)
+			}
+
+			if wsSensor.SensorMU == "Km/h" {
+				// convert into m/s
+				value = 0.277778 * windSpeedItem.SensorValue()
+			} else if wsSensor.SensorMU == "m/s" {
+				value = windSpeedItem.SensorValue()
+			} else {
+				return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
+			}
+
+			currentObs.Metric.WindspeedAvg = value
 			windSpeedIdx++
+
 		}
 
 		if precipitableWaterItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(precipitableWaterItem.At) {
@@ -462,6 +481,9 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 		if sensor.Lat >= domain.MinLat && sensor.Lat <= domain.MaxLat &&
 			sensor.Lon >= domain.MinLon && sensor.Lon <= domain.MaxLon {
 			sensor.Elevation = elevations.getElevation(sensor.Lat, sensor.Lon)
+			if _, exists := sensorsTable[sensor.ID]; exists {
+				return fmt.Errorf("Sensor exists with id %s", sensor.ID)
+			}
 			sensorsTable[sensor.ID] = sensor
 
 		}
