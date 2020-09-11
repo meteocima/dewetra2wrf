@@ -240,12 +240,11 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 
 		if windSpeedItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
 
-			var value sensor.Value
+			value := sensor.NaN()
 
 			wsSensor, ok := sensorsTable[windSpeedItem.ID]
 			if !ok {
 				fmt.Printf("Unknown sensor %s\n", windSpeedItem.ID)
-				currentObs.Metric.WindspeedAvg = sensor.NaN()
 			} else {
 				if wsSensor.SensorMU == "Km/h" {
 					// convert into m/s
@@ -256,8 +255,8 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 					return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
 				}
 			}
-
 			currentObs.Metric.WindspeedAvg = value
+
 			windSpeedIdx++
 
 		}
