@@ -126,13 +126,19 @@ func ToWRFDA(obs sensor.Observation) string {
 		dataQCError(num(surfaceLevelPressure, 12.3), 99.99) +
 			dataQCError3(num(precipTotal, 12.3), 99.99)
 
+	elev := ""
+	if obs.Metric.Pressure.IsNaN() {
+		elev = dataQCError(num(sensor.Value(obs.Elevation), 12.3), 999.99)
+	} else {
+		elev = dataQCError(num(sensor.NaN(), 12.3), 999.99)
+	}
+			
 	thirstLine :=
 		dataQCError(num(obs.Metric.Pressure, 12.3), 1.0) +
 			dataQCError(num(obs.Metric.WindspeedAvg, 12.3), 1.0) +
 			dataQCError(num(obs.WinddirAvg, 12.3), 1.0) +
 			space(11) +
-			//dataQCError(num(sensor.Value(obs.Elevation), 12.3), 999.99) +
-			dataQCError(num(sensor.NaN(), 12.3), 999.99) +
+			elev +
 			dataQCError(num(obs.Metric.TempAvg, 12.3), 1.0) +
 			dataQCError(num(obs.Metric.DewptAvg, 12.3), 1.0) +
 			space(11) +
