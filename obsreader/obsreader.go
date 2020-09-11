@@ -244,16 +244,17 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 
 			wsSensor, ok := sensorsTable[windSpeedItem.ID]
 			if !ok {
-				return nil, fmt.Errorf("Unknown sensor %s", windSpeedItem.ID)
-			}
-
-			if wsSensor.SensorMU == "Km/h" {
-				// convert into m/s
-				value = 0.277778 * windSpeedItem.SensorValue()
-			} else if wsSensor.SensorMU == "m/s" {
-				value = windSpeedItem.SensorValue()
+				fmt.Printf("Unknown sensor %s\n", windSpeedItem.ID)
+				currentObs.Metric.WindspeedAvg = sensor.NaN()
 			} else {
-				return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
+				if wsSensor.SensorMU == "Km/h" {
+					// convert into m/s
+					value = 0.277778 * windSpeedItem.SensorValue()
+				} else if wsSensor.SensorMU == "m/s" {
+					value = windSpeedItem.SensorValue()
+				} else {
+					return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
+				}
 			}
 
 			currentObs.Metric.WindspeedAvg = value
@@ -271,7 +272,7 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 			pressureIdx++
 		} else {
 
-			currentObs.Metric.Pressure =  sensor.NaN() //standardAtmosphere(station.Elevation)
+			currentObs.Metric.Pressure = sensor.NaN() //standardAtmosphere(station.Elevation)
 		}
 
 		// formula for dewpoint calculation must be applied with
