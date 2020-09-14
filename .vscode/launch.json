@@ -6,6 +6,7 @@
   "configurations": [
 
 
+
     {
       "name": "Launch",
       "type": "go",
@@ -15,11 +16,11 @@
       "env": {},
       "args": [
         "-date",
-        "2020071509",
+        "2020071506",
         "-domain",
         "-90,90,-180,180",
         "-input",
-        "data/wunder/2020071506"
+        "data/fiduciarie"
       ]
     }
   ]

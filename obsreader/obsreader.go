@@ -271,7 +271,7 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 			pressureIdx++
 		} else {
 
-			currentObs.Metric.Pressure = sensor.NaN() //standardAtmosphere(station.Elevation)
+			currentObs.Metric.Pressure = standardAtmosphere(station.Elevation)
 		}
 
 		// formula for dewpoint calculation must be applied with
