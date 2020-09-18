@@ -12,7 +12,7 @@ import (
 )
 
 func TestDownloadPrecipitableWater(t *testing.T) {
-	data := testutil.FixtureDir("testanagr")
+	data := testutil.FixtureDir("anagr")
 	os.MkdirAll(data, os.FileMode(0755))
 	defer os.RemoveAll(data)
 	err := DownloadAndConvert(

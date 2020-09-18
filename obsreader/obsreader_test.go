@@ -44,7 +44,7 @@ func TestMatchDownloadedData(t *testing.T) {
 	assert.Equal(t, results[0].HumidityAvg, sensor.Value(75.00000))
 	assert.Equal(t, results[0].WinddirAvg, sensor.Value(292.00000))
 	assert.Equal(t, results[0].Metric.TempAvg, sensor.Value(13.00000))
-	assert.True(t, math.IsNaN(float64(results[0].Metric.DewptAvg)))
+	//assert.True(t, math.IsNaN(float64(results[0].Metric.DewptAvg)))
 	assert.Equal(t, results[0].Metric.WindspeedAvg, sensor.Value(0.60000))
 	assert.True(t, math.IsNaN(float64(results[0].Metric.Pressure)))
 	assert.Equal(t, results[0].Metric.PrecipTotal, sensor.Value(0.00000))
@@ -59,7 +59,7 @@ func TestSensorValueUnmarshalNaN(t *testing.T) {
 	err = json.Unmarshal(buff, &observations)
 	assert.NoError(t, err)
 
-	assert.True(t, math.IsNaN(observations[0].Metric.DewptAvg.AsFloat()))
+	assert.True(t, math.IsNaN(observations[0].Metric.Pressure.AsFloat()))
 	//fmt.Println(string(resultsBuff))
 
 }

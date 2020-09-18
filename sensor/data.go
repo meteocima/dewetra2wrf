@@ -73,8 +73,8 @@ func (data *Value) UnmarshalJSON(buff []byte) error {
 
 // ObservationMetric is
 type ObservationMetric struct {
-	TempAvg      Value
-	DewptAvg     Value
+	TempAvg Value
+	//DewptAvg     Value
 	WindspeedAvg Value
 	Pressure     Value
 	PrecipTotal  Value
@@ -108,6 +108,7 @@ const (
 	d = 234.5
 )
 
+/*
 // CalculateDewpoint calcultes the dewpoint temperature using
 // [Arden Buck equation[(https://en.wikipedia.org/wiki/Dew_point#Calculating_the_dew_point)
 // Calculated value is stored directly in the Observation object DewptAvg
@@ -125,6 +126,7 @@ func (obs *Observation) CalculateDewpoint() {
 
 	obs.Metric.DewptAvg = Value((c * gammaM) / (b - gammaM))
 }
+*/
 
 // Domain is
 type Domain struct {

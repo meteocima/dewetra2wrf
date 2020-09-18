@@ -215,7 +215,7 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 			WinddirAvg:  sensor.Value(math.NaN()),
 			Elevation:   station.Elevation,
 			Metric: sensor.ObservationMetric{
-				DewptAvg:     sensor.Value(math.NaN()),
+				//DewptAvg:     sensor.Value(math.NaN()),
 				PrecipTotal:  sensor.Value(math.NaN()),
 				Pressure:     sensor.Value(math.NaN()),
 				TempAvg:      sensor.Value(math.NaN()),
@@ -274,12 +274,14 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 			currentObs.Metric.Pressure = standardAtmosphere(station.Elevation)
 		}
 
-		// formula for dewpoint calculation must be applied with
-		// temperature stil in celsius
-		currentObs.CalculateDewpoint()
+		/*
+			// formula for dewpoint calculation must be applied with
+			// temperature stil in celsius
+			currentObs.CalculateDewpoint()
+		*/
 
 		// convert temperatures from °celsius to °kelvin
-		currentObs.Metric.DewptAvg += 273.15
+		//currentObs.Metric.DewptAvg += 273.15
 		currentObs.Metric.TempAvg += 273.15
 
 		// convert pression from hPa to Pa
