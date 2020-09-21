@@ -10,6 +10,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/meteocima/dewetra2wrf/obsreader/wunderground"
 	"github.com/meteocima/dewetra2wrf/sensor"
 )
 
@@ -96,6 +97,11 @@ func (bn byName) Swap(i, j int) {
 	save := bn.ids[i]
 	bn.ids[i] = bn.ids[j]
 	bn.ids[j] = save
+}
+
+// AllSensorsWund is
+func AllSensorsWund(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
+	return wunderground.Read(dataPath, domain, date)
 }
 
 // AllSensors is

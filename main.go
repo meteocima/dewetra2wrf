@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = trusted.Get(*input, *outfile, *domainS, date)
+	err = trusted.Get(trusted.WundergroundFormat, *input, *outfile, *domainS, date)
 
 	if err != nil {
 		log.Fatal(err)

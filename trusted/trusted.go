@@ -14,6 +14,27 @@ import (
 	"github.com/meteocima/dewetra2wrf/obsreader"
 )
 
+// InputFormat ...
+type InputFormat int
+
+// InputFormat values ...
+const (
+	DewetraFormat InputFormat = iota
+	WundergroundFormat
+)
+
+func (f InputFormat) String() string {
+	if f == DewetraFormat {
+		return "DewetraFormat"
+	}
+
+	if f == DewetraFormat {
+		return "WundergroundFormat"
+	}
+
+	return fmt.Sprintf("%d", int(f))
+}
+
 var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"SYNOP = %6d, METAR =      0, SHIP  =      0, BUOY  =      0, BOGUS =      0, TEMP  =      0,\n" +
 	"AMDAR =      0, AIREP =      0, TAMDAR=      0, PILOT =      0, SATEM =      0, SATOB =      0,\n" +
@@ -36,16 +57,28 @@ var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))\n" +
 	"#------------------------------------------------------------------------------#\n"
 
-func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, filename string) error {
+func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domain, date time.Time, filename string) error {
 	/*
 		AllSensors returns a chan of sensors read. the sensors variables are emitted in to the chan as soon as
 		all sensor variables are read, and written in the out file at abs locations.
 		An init function previously calculate the position of every sensor variable in the file.
 	*/
 
-	sensorsObservations, err := obsreader.AllSensors(dataPath, domain, date)
-	if err != nil {
-		return err
+	var sensorsObservations []sensor.Observation
+	if format == DewetraFormat {
+		obss, err := obsreader.AllSensors(dataPath, domain, date)
+		if err != nil {
+			return err
+		}
+		sensorsObservations = obss
+	} else if format == WundergroundFormat {
+		obss, err := obsreader.AllSensorsWund(dataPath, domain, date)
+		if err != nil {
+			return err
+		}
+		sensorsObservations = obss
+	} else {
+		panic("Unknown format " + format.String())
 	}
 
 	results := make([]string, len(sensorsObservations))
@@ -61,7 +94,8 @@ func DownloadAndConvert(dataPath string, domain sensor.Domain, date time.Time, f
 
 }
 
-func Get(data string, outputFile string, domain string, date time.Time) error {
+// Get ...
+func Get(format InputFormat, data string, outputFile string, domain string, date time.Time) error {
 
 	coords := strings.Split(domain, ",")
 
@@ -93,6 +127,7 @@ func Get(data string, outputFile string, domain string, date time.Time) error {
 	)
 
 	return DownloadAndConvert(
+		format,
 		data,
 		//
 		// leftlon, rightlon, toplat, bottomlat
