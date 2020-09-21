@@ -10,6 +10,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/meteocima/dewetra2wrf/obsreader/elevations"
 	"github.com/meteocima/dewetra2wrf/obsreader/wunderground"
 	"github.com/meteocima/dewetra2wrf/sensor"
 )
@@ -435,38 +436,6 @@ func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (
 	return sensorsTable, nil
 }
 
-type elevationsFile struct {
-	xs, ys []float64
-	zs     []int32
-}
-
-func openElevationsFile(dirname string) (*elevationsFile, error) {
-
-	orog := "/usr/local/dewetra2wrf/orog.nc"
-	elev := &elevationsFile{}
-	f := File{}
-	f.Open(orog)
-	defer f.Close()
-	x := f.Var("x")
-	y := f.Var("y")
-	z := f.Var("z")
-
-	elev.xs = x.ValuesFloat64()
-	elev.ys = y.ValuesFloat64()
-	elev.zs = z.ValuesInt32()
-
-	return elev, f.Error()
-
-}
-
-func (file *elevationsFile) getElevation(lat, lon float64) float64 {
-	ypos := int((0.5 + lat/180) * float64(len(file.ys)))
-	xpos := int((0.5 + lon/360) * float64(len(file.xs)))
-
-	val := float64(file.zs[xpos+ypos*len(file.xs)])
-	return val
-}
-
 func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {
 	sensorsAnag := []sensorAnag{}
 	///*testutil.FixtureDir(".."),*/ "../data"
@@ -480,7 +449,7 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 		return err
 	}
 
-	elevations, err := openElevationsFile(dataPath)
+	elevations, err := elevations.OpenElevationsFile(dataPath)
 	if err != nil {
 		return err
 	}
@@ -488,7 +457,7 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 	for _, sensor := range sensorsAnag {
 		if sensor.Lat >= domain.MinLat && sensor.Lat <= domain.MaxLat &&
 			sensor.Lon >= domain.MinLon && sensor.Lon <= domain.MaxLon {
-			sensor.Elevation = elevations.getElevation(sensor.Lat, sensor.Lon)
+			sensor.Elevation = elevations.GetElevation(sensor.Lat, sensor.Lon)
 			if _, exists := sensorsTable[sensor.ID]; exists {
 				return fmt.Errorf("Sensor exists with id %s", sensor.ID)
 			}

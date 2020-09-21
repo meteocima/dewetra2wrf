@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	format := flag.String("format", ".", "format of input files (DEWETRA or WUNDERGROUND)")
 	input := flag.String("input", ".", "where to read input files")
 	outfile := flag.String("outfile", "./out", "where to save converted file")
 	domainS := flag.String("domain", "", "domain to filter stations to download [MinLat,MaxLat,MinLon,MaxLon]")
@@ -30,7 +31,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = trusted.Get(trusted.WundergroundFormat, *input, *outfile, *domainS, date)
+	form := trusted.DewetraFormat
+	if *format == "WUNDERGROUND" {
+		form = trusted.WundergroundFormat
+	}
+	err = trusted.Get(form, *input, *outfile, *domainS, date)
 
 	if err != nil {
 		log.Fatal(err)

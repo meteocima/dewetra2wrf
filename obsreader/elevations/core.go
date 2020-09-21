@@ -1,4 +1,4 @@
-package obsreader
+package elevations
 
 import (
 	"fmt"

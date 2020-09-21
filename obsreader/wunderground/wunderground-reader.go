@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/meteocima/dewetra2wrf/obsreader/elevations"
 	"github.com/meteocima/dewetra2wrf/sensor"
 )
 
@@ -36,6 +37,10 @@ func Read(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Obser
 		return nil, err
 	}
 	observations := []sensor.Observation{}
+	elevations, err := elevations.OpenElevationsFile(dataPath)
+	if err != nil {
+		return nil, err
+	}
 	for _, f := range files {
 		obsBuf, err := ioutil.ReadFile(filepath.Join(dateDir, f.Name()))
 		if err != nil {
@@ -48,11 +53,13 @@ func Read(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Obser
 		}
 		if obs.Lat <= domain.MaxLat && obs.Lat >= domain.MinLat &&
 			obs.Lon <= domain.MaxLon && obs.Lon >= domain.MinLon {
+
 			dt, err := time.Parse(time.RFC3339, obs.ObsTimeUtc)
 			if err != nil {
 				return nil, err
 			}
 			resObs := sensor.Observation{
+				Elevation:   elevations.GetElevation(obs.Lat, obs.Lon),
 				StationID:   obs.StationID,
 				StationName: obs.StationID,
 				HumidityAvg: sensor.Value(obs.HumidityAvg),
@@ -67,6 +74,13 @@ func Read(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Obser
 					PrecipTotal:  sensor.Value(obs.Metric.PrecipTotal),
 				},
 			}
+			// convert temperatures from °celsius to °kelvin
+			resObs.Metric.TempAvg += 273.15
+			// convert wind speed from km/h into m/s
+			resObs.Metric.WindspeedAvg *= 0.277778
+			// convert pressure from mbar into Pa
+			resObs.Metric.Pressure *= 100
+
 			observations = append(observations, resObs)
 		}
 
