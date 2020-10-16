@@ -105,6 +105,11 @@ func AllSensorsWund(dataPath string, domain sensor.Domain, date time.Time) ([]se
 	return wunderground.Read(dataPath, domain, date)
 }
 
+// AllSensorsWundHistory is
+func AllSensorsWundHistory(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
+	return wunderground.ReadHistory(dataPath, domain, date)
+}
+
 // AllSensors is
 func AllSensors(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
 

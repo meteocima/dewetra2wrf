@@ -34,7 +34,14 @@ func main() {
 	form := trusted.DewetraFormat
 	if *format == "WUNDERGROUND" {
 		form = trusted.WundergroundFormat
+	} else if *format == "DEWETRA" {
+		form = trusted.DewetraFormat
+	} else if *format == "WUNDERHIST" {
+		form = trusted.WunderHistFormat
+	} else {
+		panic("Unknown format " + *format)
 	}
+
 	err = trusted.Get(form, *input, *outfile, *domainS, date)
 
 	if err != nil {

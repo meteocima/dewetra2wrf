@@ -21,6 +21,7 @@ type InputFormat int
 const (
 	DewetraFormat InputFormat = iota
 	WundergroundFormat
+	WunderHistFormat
 )
 
 func (f InputFormat) String() string {
@@ -28,8 +29,12 @@ func (f InputFormat) String() string {
 		return "DewetraFormat"
 	}
 
-	if f == DewetraFormat {
+	if f == WundergroundFormat {
 		return "WundergroundFormat"
+	}
+
+	if f == DewetraFormat {
+		return "WunderHistFormat"
 	}
 
 	return fmt.Sprintf("%d", int(f))
@@ -77,6 +82,13 @@ func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domai
 			return err
 		}
 		sensorsObservations = obss
+	} else if format == WunderHistFormat {
+		obss, err := obsreader.AllSensorsWundHistory(dataPath, domain, date)
+		if err != nil {
+			return err
+		}
+		sensorsObservations = obss
+
 	} else {
 		panic("Unknown format " + format.String())
 	}

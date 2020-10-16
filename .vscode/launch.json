@@ -18,12 +18,17 @@
       "env": {},
       "args": [
         "-date",
-        "2020071506",
+        "2019051112",
         "-domain",
-        "-90,90,-180,180",
+        "24,64,-19,48",
         "-input",
-        "data/wundformat"
+        "data",
+        "-format", 
+        "WUNDERHIST" ,
+        "-outfile",
+        "ob.ascii.2019051112"
       ]
     }
   ]
 }
+
