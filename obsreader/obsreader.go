@@ -254,19 +254,17 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 
 			value := sensor.NaN()
 
-			wsSensor, ok := sensorsTable[windSpeedItem.ID]
-			if !ok {
-				fmt.Printf("Unknown sensor %s\n", windSpeedItem.ID)
+			wsSensor := sensorsTable[windSpeedItem.ID]
+
+			if wsSensor.SensorMU == "Km/h" {
+				// convert into m/s
+				value = 0.277778 * windSpeedItem.SensorValue()
+			} else if wsSensor.SensorMU == "m/s" {
+				value = windSpeedItem.SensorValue()
 			} else {
-				if wsSensor.SensorMU == "Km/h" {
-					// convert into m/s
-					value = 0.277778 * windSpeedItem.SensorValue()
-				} else if wsSensor.SensorMU == "m/s" {
-					value = windSpeedItem.SensorValue()
-				} else {
-					return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
-				}
+				return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
 			}
+
 			currentObs.Metric.WindspeedAvg = value
 
 			windSpeedIdx++
@@ -389,16 +387,18 @@ func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string
 	betterTimed := map[string]sensor.Result{}
 
 	for _, sens := range data {
+		sensAnag, ok := sensorsTable[sens.SensorID]
+		if !ok {
+			continue
+		}
 		for idx, dateS := range sens.Timeline {
 			at, err := time.Parse("200601021504", dateS)
 			if err != nil {
 				return nil, err
 			}
 
-			//at = at.Add(time.Hour * 2)
-
-			sensAnag := sensorsTable[sens.SensorID]
 			sortKey := fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon)
+			//fmt.Println(sortKey)
 
 			betterTimedObs, ok := betterTimed[sortKey]
 
@@ -432,6 +432,7 @@ func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string
 
 func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
+	//fmt.Println("openSensorsMap", sensorClass, domain)
 
 	err := fillSensorsMap(dataPath, domain, sensorClass, sensorsTable)
 	if err != nil {
@@ -442,6 +443,8 @@ func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (
 }
 
 func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {
+	//fmt.Printf("fillSensorsMap %s\n", sensorClass)
+
 	sensorsAnag := []sensorAnag{}
 	///*testutil.FixtureDir(".."),*/ "../data"
 	sensorsAnagContent, err := ioutil.ReadFile(path.Join(dataPath, sensorClass+"-registry.json"))
@@ -466,6 +469,7 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 			if _, exists := sensorsTable[sensor.ID]; exists {
 				return fmt.Errorf("Sensor exists with id %s", sensor.ID)
 			}
+			//fmt.Printf("%s sensor %s\n", sensorClass, sensor.ID)
 			sensorsTable[sensor.ID] = sensor
 
 		}
@@ -476,6 +480,8 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 
 func openCompleteSensorsMap(dataPath string, domain sensor.Domain) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
+
+	//fmt.Println("openCompleteSensorsMap", domain)
 
 	err := fillSensorsMap(dataPath, domain, "IGROMETRO", sensorsTable)
 	if err != nil {

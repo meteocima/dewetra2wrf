@@ -4,11 +4,6 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-  
-
-
-
-
     {
       "name": "Launch",
       "type": "go",
@@ -18,17 +13,16 @@
       "env": {},
       "args": [
         "-date",
-        "2019051112",
+        "2020071505",
         "-domain",
-        "24,64,-19,48",
+        "24,24.1,19,19.1",
         "-input",
-        "data",
-        "-format", 
-        "WUNDERHIST" ,
+        "data/fiduciarie",
+        "-format",
+        "DEWETRA",
         "-outfile",
-        "ob.ascii.2019051112"
+        "ob.ascii.2020071505"
       ]
     }
   ]
 }
-

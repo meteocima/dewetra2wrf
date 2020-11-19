@@ -130,14 +130,14 @@ func Get(format InputFormat, data string, outputFile string, domain string, date
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("MinLat: %f\nMinLon: %f\nMaxLat: %f\nMaxLon: %f\n",
-		MinLat,
-		MinLon,
-		MaxLat,
-		MaxLon,
-	)
-
+	/*
+		fmt.Printf("MinLat: %f\nMinLon: %f\nMaxLat: %f\nMaxLon: %f\n",
+			MinLat,
+			MinLon,
+			MaxLat,
+			MaxLon,
+		)
+	*/
 	return DownloadAndConvert(
 		format,
 		data,
