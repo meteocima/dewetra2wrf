@@ -7,7 +7,7 @@ type ElevationsFile struct {
 
 func OpenElevationsFile(dirname string) (*ElevationsFile, error) {
 
-	orog := "/usr/local/dewetra2wrf/orog.nc"
+	orog := "~/.dewetra2wrf/orog.nc"
 	elev := &ElevationsFile{}
 	f := File{}
 	f.Open(orog)
