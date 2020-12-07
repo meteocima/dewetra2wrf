@@ -1,13 +1,18 @@
 package elevations
 
+import (
+	"os"
+	"path"
+)
+
 type ElevationsFile struct {
 	xs, ys []float64
 	zs     []int32
 }
 
 func OpenElevationsFile(dirname string) (*ElevationsFile, error) {
-
-	orog := "~/.dewetra2wrf/orog.nc"
+	home, _ := os.UserHomeDir()
+	orog := path.Join(home, ".dewetra2wrf", "orog.nc")
 	elev := &ElevationsFile{}
 	f := File{}
 	f.Open(orog)
