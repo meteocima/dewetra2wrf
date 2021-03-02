@@ -16,6 +16,7 @@ func TestDownloadPrecipitableWater(t *testing.T) {
 	os.MkdirAll(data, os.FileMode(0755))
 	defer os.RemoveAll(data)
 	err := DownloadAndConvert(
+		DewetraFormat,
 		data,
 		// LIGURIA sensor.Domain{MinLat: 43, MinLon: 7, MaxLat: 44, MaxLon: 10},
 		sensor.Domain{MinLat: 34, MinLon: 4, MaxLat: 47, MaxLon: 20},

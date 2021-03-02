@@ -47,9 +47,9 @@ type sensorData struct {
 
 type sensorAnag struct {
 	ID                  string
-	StationName         string
-	SensorMU            string
-	Lon, Lat, Elevation float64
+	Name                string
+	MU                  string
+	Lng, Lat, Elevation float64
 }
 
 func observationIsLess(this, that sensor.Result) bool {
@@ -90,7 +90,7 @@ func (bn byName) Len() int {
 func (bn byName) Less(i, j int) bool {
 	idI := bn.ids[i]
 	idJ := bn.ids[j]
-	return bn.table[idI].StationName < bn.table[idJ].StationName
+	return bn.table[idI].Name < bn.table[idJ].Name
 }
 
 // Swap swaps the elements with indexes i and j.
@@ -220,18 +220,18 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 		currentObs := sensor.Observation{
 			ObsTimeUtc:  minItem.At,
 			StationID:   station.ID,
-			StationName: station.StationName,
+			StationName: station.Name,
 			Lat:         station.Lat,
-			Lon:         station.Lon,
-			HumidityAvg: sensor.Value(math.NaN()),
-			WinddirAvg:  sensor.Value(math.NaN()),
+			Lon:         station.Lng,
+			HumidityAvg: sensor.NaN(),
+			WinddirAvg:  sensor.NaN(),
 			Elevation:   station.Elevation,
 			Metric: sensor.ObservationMetric{
-				//DewptAvg:     sensor.Value(math.NaN()),
-				PrecipTotal:  sensor.Value(math.NaN()),
-				Pressure:     sensor.Value(math.NaN()),
-				TempAvg:      sensor.Value(math.NaN()),
-				WindspeedAvg: sensor.Value(math.NaN()),
+				//DewptAvg:     sensor.NaN(),
+				PrecipTotal:  sensor.NaN(),
+				Pressure:     sensor.NaN(),
+				TempAvg:      sensor.NaN(),
+				WindspeedAvg: sensor.NaN(),
 			},
 		}
 
@@ -256,13 +256,13 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 
 			wsSensor := sensorsTable[windSpeedItem.ID]
 
-			if wsSensor.SensorMU == "Km/h" {
+			if wsSensor.MU == "Km/h" {
 				// convert into m/s
 				value = 0.277778 * windSpeedItem.SensorValue()
-			} else if wsSensor.SensorMU == "m/s" {
+			} else if wsSensor.MU == "m/s" {
 				value = windSpeedItem.SensorValue()
 			} else {
-				return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.SensorMU)
+				return nil, fmt.Errorf("Unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.MU)
 			}
 
 			currentObs.Metric.WindspeedAvg = value
@@ -392,12 +392,12 @@ func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string
 			continue
 		}
 		for idx, dateS := range sens.Timeline {
-			at, err := time.Parse("200601021504", dateS)
+			at, err := time.Parse(time.RFC3339, dateS)
 			if err != nil {
 				return nil, err
 			}
 
-			sortKey := fmt.Sprintf("%s:%05f:%05f", sensAnag.StationName, sensAnag.Lat, sensAnag.Lon)
+			sortKey := fmt.Sprintf("%s:%05f:%05f", sensAnag.Name, sensAnag.Lat, sensAnag.Lng)
 			//fmt.Println(sortKey)
 
 			betterTimedObs, ok := betterTimed[sortKey]
@@ -464,8 +464,8 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 
 	for _, sensor := range sensorsAnag {
 		if sensor.Lat >= domain.MinLat && sensor.Lat <= domain.MaxLat &&
-			sensor.Lon >= domain.MinLon && sensor.Lon <= domain.MaxLon {
-			sensor.Elevation = elevations.GetElevation(sensor.Lat, sensor.Lon)
+			sensor.Lng >= domain.MinLon && sensor.Lng <= domain.MaxLon {
+			sensor.Elevation = elevations.GetElevation(sensor.Lat, sensor.Lng)
 			if _, exists := sensorsTable[sensor.ID]; exists {
 				return fmt.Errorf("Sensor exists with id %s", sensor.ID)
 			}

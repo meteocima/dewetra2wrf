@@ -28,6 +28,9 @@ type Result struct {
 
 // SensorValue is
 func (result Result) SensorValue() Value {
+	if result.Value == -9998 {
+		return NaN()
+	}
 	return Value(result.Value)
 }
 
