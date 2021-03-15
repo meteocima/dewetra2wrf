@@ -1,5 +1,6 @@
 package testutil
 
+/*
 import (
 	"encoding/json"
 	"io/ioutil"
@@ -69,3 +70,4 @@ func AllSensorsFromFixture(t *testing.T, dataPath string, matchDownloadedData Ma
 	temperature := GetResultsFile(t, "TERMOMETRO.json")
 	return matchDownloadedData(dataPath, sensor.Domain{MinLat: 34, MinLon: 4, MaxLat: 47, MaxLon: 20}, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }
+*/

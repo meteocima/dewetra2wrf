@@ -51,28 +51,6 @@ func (data *File) IsOpen() bool {
 	return data.ds != nil
 }
 
-/*
-// GetDimensionLen ...
-func (data *File) GetDimensionLen(name string) uint64 {
-	if data.err != nil {
-		return 0
-	}
-
-	dim, err := data.ds.Dim(name)
-	if data.err != nil {
-		data.err = err
-		return 0
-	}
-
-	dimlen, err := dim.Len()
-	if data.err != nil {
-		data.err = err
-		return 0
-	}
-
-	return dimlen
-}
-*/
 // Close ...
 func (data *File) Close() {
 	if data.err != nil {

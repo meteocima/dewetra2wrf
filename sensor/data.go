@@ -7,18 +7,20 @@ import (
 	"time"
 )
 
-// Collection is an enum that represents collections
-// of meteo stations (e.g. wunderground stations)
+// Collection is an enum that represents
+// category of meteo stations (e.g. wunderground
+// stations or DPC network stations)
 type Collection int
 
-// Wunderground represents wunderground stations
-// DPCTrusted represents trusted italian stations
 const (
+	// Wunderground represents wunderground stations
 	Wunderground Collection = iota
+	// DPCTrusted represents trusted italian stations
 	DPCTrusted
 )
 
 // Result represent a sensor value at a point in time
+// as read from CIMA webdrops webapi.
 type Result struct {
 	SortKey string
 	At      time.Time
@@ -26,7 +28,9 @@ type Result struct {
 	ID      string
 }
 
-// SensorValue is
+// SensorValue returns the value
+// contained in this Result instance, or NaN()
+// if not value is present.
 func (result Result) SensorValue() Value {
 	if result.Value == -9998 {
 		return NaN()
@@ -96,40 +100,31 @@ type Observation struct {
 	Metric      ObservationMetric
 }
 
+type WundObsMetric struct {
+	DewptAvg     float64
+	PressureMin  float64
+	PressureMax  float64
+	TempAvg      float64
+	WindspeedAvg float64
+	PrecipTotal  float64
+}
+
+type WundObs struct {
+	HumidityAvg float64
+	Lat         float64
+	Lon         float64
+	WinddirAvg  float64
+	ObsTimeUtc  string
+	StationID   string
+	Metric      WundObsMetric
+}
+
 // SortKey returns a string used to sort observations
 func (obs Observation) SortKey() string {
 	s := fmt.Sprintf("%s:%05f:%05f", obs.StationName, obs.Lat, obs.Lon)
 	return s
 
 }
-
-// Constant related to Arden Buck equation
-const (
-	a = 6.1121 // mbar
-	b = 18.678
-	c = 257.14 // °C,
-	d = 234.5
-)
-
-/*
-// CalculateDewpoint calcultes the dewpoint temperature using
-// [Arden Buck equation[(https://en.wikipedia.org/wiki/Dew_point#Calculating_the_dew_point)
-// Calculated value is stored directly in the Observation object DewptAvg
-// field.
-func (obs *Observation) CalculateDewpoint() {
-	if obs.HumidityAvg.IsNaN() || obs.Metric.TempAvg.IsNaN() {
-		obs.Metric.DewptAvg = Value(math.NaN())
-		return
-	}
-
-	RH := obs.HumidityAvg.AsFloat() / 100
-	T := obs.Metric.TempAvg.AsFloat()
-	exp := (b - T/d) * (T / (c + T))
-	gammaM := math.Log(RH * math.Pow(math.E, exp))
-
-	obs.Metric.DewptAvg = Value((c * gammaM) / (b - gammaM))
-}
-*/
 
 // Domain is
 type Domain struct {

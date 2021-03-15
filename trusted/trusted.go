@@ -71,19 +71,19 @@ func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domai
 
 	var sensorsObservations []sensor.Observation
 	if format == DewetraFormat {
-		obss, err := obsreader.AllSensors(dataPath, domain, date)
+		obss, err := obsreader.WebdropsObsReader{}.ReadAll(dataPath, domain, date)
 		if err != nil {
 			return err
 		}
 		sensorsObservations = obss
 	} else if format == WundergroundFormat {
-		obss, err := obsreader.AllSensorsWund(dataPath, domain, date)
+		obss, err := obsreader.WundCurrentObsReader{}.ReadAll(dataPath, domain, date)
 		if err != nil {
 			return err
 		}
 		sensorsObservations = obss
 	} else if format == WunderHistFormat {
-		obss, err := obsreader.AllSensorsWundHistory(dataPath, domain, date)
+		obss, err := obsreader.WundHistObsReader{}.ReadAll(dataPath, domain, date)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domai
 
 	results := make([]string, len(sensorsObservations))
 	for i, result := range sensorsObservations {
-		results[i] = conversion.ToWRFDA(result)
+		results[i] = conversion.ToWRFASCII(result)
 	}
 
 	resultsS := strings.Join(results, "\n")
@@ -106,52 +106,33 @@ func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domai
 
 }
 
-// Get ...
-func Get(format InputFormat, data string, outputFile string, domain string, date time.Time) error {
-
-	coords := strings.Split(domain, ",")
+func DomainFromS(s string) (*sensor.Domain, error) {
+	coords := strings.Split(s, ",")
 
 	MinLat, err := strconv.ParseFloat(coords[0], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	MaxLat, err := strconv.ParseFloat(coords[1], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	MinLon, err := strconv.ParseFloat(coords[2], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	MaxLon, err := strconv.ParseFloat(coords[3], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	/*
-		fmt.Printf("MinLat: %f\nMinLon: %f\nMaxLat: %f\nMaxLon: %f\n",
-			MinLat,
-			MinLon,
-			MaxLat,
-			MaxLon,
-		)
-	*/
-	return DownloadAndConvert(
-		format,
-		data,
-		//
-		// leftlon, rightlon, toplat, bottomlat
-		sensor.Domain{
-			MinLat: MinLat,
-			MinLon: MinLon,
-			MaxLat: MaxLat,
-			MaxLon: MaxLon,
-		},
-		date,
 
-		outputFile,
-	)
-
+	return &sensor.Domain{
+		MinLat: MinLat,
+		MinLon: MinLon,
+		MaxLat: MaxLat,
+		MaxLon: MaxLon,
+	}, nil
 }

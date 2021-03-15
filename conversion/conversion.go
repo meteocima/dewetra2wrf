@@ -1,9 +1,7 @@
 package conversion
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -14,18 +12,6 @@ import (
 
 // QC is
 const QC = 0
-
-func skipLines(reader *bufio.Reader, n int) {
-	for i := 0; i < n; i++ {
-		_, err := reader.ReadString('\n')
-		if err == io.EOF {
-			return
-		}
-		if err != nil {
-			panic(err)
-		}
-	}
-}
 
 func str(s string, ln int) string {
 	strFmt := fmt.Sprintf("%%-%ds", ln)
@@ -100,8 +86,8 @@ func onlyletters(s string) string {
 //SRFC_FMT = (F12.3,I4,F7.2,F12.3,I4,F7.3)
 //EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))
 
-// ToWRFDA is
-func ToWRFDA(obs sensor.Observation) string {
+// ToWRFASCII is
+func ToWRFASCII(obs sensor.Observation) string {
 	firstLine :=
 		str("FM-12 SYNOP", 12) +
 			" " +

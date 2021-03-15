@@ -42,7 +42,12 @@ func main() {
 		panic("Unknown format " + *format)
 	}
 
-	err = trusted.Get(form, *input, *outfile, *domainS, date)
+	domain, err := trusted.DomainFromS(*domainS)
+	if err != nil {
+		panic(err)
+	}
+
+	err = trusted.DownloadAndConvert(form, *input, *domain, date, *outfile)
 
 	if err != nil {
 		log.Fatal(err)
