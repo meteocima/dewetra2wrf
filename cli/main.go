@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/meteocima/dewetra2wrf/trusted"
+	"github.com/meteocima/dewetra2wrf"
 )
 
 func main() {
@@ -31,23 +31,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	form := trusted.DewetraFormat
+	form := dewetra2wrf.DewetraFormat
 	if *format == "WUNDERGROUND" {
-		form = trusted.WundergroundFormat
+		form = dewetra2wrf.WundergroundFormat
 	} else if *format == "DEWETRA" {
-		form = trusted.DewetraFormat
+		form = dewetra2wrf.DewetraFormat
 	} else if *format == "WUNDERHIST" {
-		form = trusted.WunderHistFormat
+		form = dewetra2wrf.WunderHistFormat
 	} else {
 		panic("Unknown format " + *format)
 	}
 
-	domain, err := trusted.DomainFromS(*domainS)
-	if err != nil {
-		panic(err)
-	}
-
-	err = trusted.DownloadAndConvert(form, *input, *domain, date, *outfile)
+	err = dewetra2wrf.Convert(form, *input, *domainS, date, *outfile)
 
 	if err != nil {
 		log.Fatal(err)

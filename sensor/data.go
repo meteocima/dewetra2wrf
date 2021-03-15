@@ -125,8 +125,3 @@ func (obs Observation) SortKey() string {
 	return s
 
 }
-
-// Domain is
-type Domain struct {
-	MinLat, MinLon, MaxLat, MaxLon float64
-}

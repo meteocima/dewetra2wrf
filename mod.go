@@ -1,10 +1,9 @@
-package trusted
+package dewetra2wrf
 
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -62,12 +61,18 @@ var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))\n" +
 	"#------------------------------------------------------------------------------#\n"
 
-func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domain, date time.Time, filename string) error {
+func Convert(format InputFormat, dataPath string, domainS string, date time.Time, filename string) error {
 	/*
 		AllSensors returns a chan of sensors read. the sensors variables are emitted in to the chan as soon as
 		all sensor variables are read, and written in the out file at abs locations.
 		An init function previously calculate the position of every sensor variable in the file.
 	*/
+
+	domainP, err := sensor.DomainFromS(domainS)
+	if err != nil {
+		panic(err)
+	}
+	domain := *domainP
 
 	var sensorsObservations []sensor.Observation
 	if format == DewetraFormat {
@@ -104,35 +109,4 @@ func DownloadAndConvert(format InputFormat, dataPath string, domain sensor.Domai
 
 	return ioutil.WriteFile(filename, []byte(header+resultsS), os.FileMode(0644))
 
-}
-
-func DomainFromS(s string) (*sensor.Domain, error) {
-	coords := strings.Split(s, ",")
-
-	MinLat, err := strconv.ParseFloat(coords[0], 64)
-	if err != nil {
-		return nil, err
-	}
-
-	MaxLat, err := strconv.ParseFloat(coords[1], 64)
-	if err != nil {
-		return nil, err
-	}
-
-	MinLon, err := strconv.ParseFloat(coords[2], 64)
-	if err != nil {
-		return nil, err
-	}
-
-	MaxLon, err := strconv.ParseFloat(coords[3], 64)
-	if err != nil {
-		return nil, err
-	}
-
-	return &sensor.Domain{
-		MinLat: MinLat,
-		MinLon: MinLon,
-		MaxLat: MaxLat,
-		MaxLon: MaxLon,
-	}, nil
 }
