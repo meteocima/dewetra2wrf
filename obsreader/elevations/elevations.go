@@ -20,7 +20,7 @@ func OpenElevationsFile(dirname string) (*ElevationsFile, error) {
 	elevLock.Lock()
 	defer elevLock.Unlock()
 	var err error
-	if elev != nil {
+	if elev == nil {
 		f := File{}
 		f.Open(orog)
 		defer f.Close()
