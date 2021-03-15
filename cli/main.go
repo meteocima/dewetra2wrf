@@ -31,16 +31,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	form := dewetra2wrf.DewetraFormat
-	if *format == "WUNDERGROUND" {
-		form = dewetra2wrf.WundergroundFormat
-	} else if *format == "DEWETRA" {
-		form = dewetra2wrf.DewetraFormat
-	} else if *format == "WUNDERHIST" {
-		form = dewetra2wrf.WunderHistFormat
-	} else {
-		panic("Unknown format " + *format)
-	}
+	var form dewetra2wrf.InputFormat
+	form.FromString(*format)
 
 	err = dewetra2wrf.Convert(form, *input, *domainS, date, *outfile)
 

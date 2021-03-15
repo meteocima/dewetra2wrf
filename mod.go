@@ -8,9 +8,8 @@ import (
 	"time"
 
 	"github.com/meteocima/dewetra2wrf/conversion"
-	"github.com/meteocima/dewetra2wrf/sensor"
-
 	"github.com/meteocima/dewetra2wrf/obsreader"
+	"github.com/meteocima/dewetra2wrf/sensor"
 )
 
 // InputFormat ...
@@ -22,6 +21,37 @@ const (
 	WundergroundFormat
 	WunderHistFormat
 )
+
+func (f InputFormat) NewReader() obsreader.ObsReader {
+	if f == DewetraFormat {
+		return obsreader.WebdropsObsReader{}
+
+	}
+
+	if f == WundergroundFormat {
+		return obsreader.WundCurrentObsReader{}
+
+	}
+
+	if f == WunderHistFormat {
+		return obsreader.WundHistObsReader{}
+
+	}
+	panic("Unknown format " + f.String())
+
+}
+
+func (f *InputFormat) FromString(s string) {
+	if s == "WUNDERGROUND" {
+		*f = WundergroundFormat
+	} else if s == "DEWETRA" {
+		*f = DewetraFormat
+	} else if s == "WUNDERHIST" {
+		*f = WunderHistFormat
+	} else {
+		panic("Unknown format " + s)
+	}
+}
 
 func (f InputFormat) String() string {
 	if f == DewetraFormat {
@@ -74,28 +104,9 @@ func Convert(format InputFormat, dataPath string, domainS string, date time.Time
 	}
 	domain := *domainP
 
-	var sensorsObservations []sensor.Observation
-	if format == DewetraFormat {
-		obss, err := obsreader.WebdropsObsReader{}.ReadAll(dataPath, domain, date)
-		if err != nil {
-			return err
-		}
-		sensorsObservations = obss
-	} else if format == WundergroundFormat {
-		obss, err := obsreader.WundCurrentObsReader{}.ReadAll(dataPath, domain, date)
-		if err != nil {
-			return err
-		}
-		sensorsObservations = obss
-	} else if format == WunderHistFormat {
-		obss, err := obsreader.WundHistObsReader{}.ReadAll(dataPath, domain, date)
-		if err != nil {
-			return err
-		}
-		sensorsObservations = obss
-
-	} else {
-		panic("Unknown format " + format.String())
+	sensorsObservations, err := format.NewReader().ReadAll(dataPath, domain, date)
+	if err != nil {
+		return err
 	}
 
 	results := make([]string, len(sensorsObservations))
