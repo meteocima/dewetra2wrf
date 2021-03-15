@@ -175,7 +175,7 @@ func (data *File) Attrib(name string) string {
 		return ""
 	}
 	if data.ds == nil {
-		data.err = fmt.Errorf("No file opened")
+		data.err = fmt.Errorf("no file opened")
 		return ""
 	}
 	if data.Attrs == nil {
@@ -191,7 +191,7 @@ func (data *File) AllAttribs() map[string]string {
 		return map[string]string{}
 	}
 	if data.ds == nil {
-		data.err = fmt.Errorf("No file opened")
+		data.err = fmt.Errorf("no file opened")
 		return map[string]string{}
 	}
 	if data.Attrs == nil {
@@ -214,7 +214,7 @@ func (data *File) Var(name string) *Variable {
 	}
 
 	if data.ds == nil {
-		data.err = fmt.Errorf("No file opened")
+		data.err = fmt.Errorf("no file opened")
 		return &Variable{file: data}
 	}
 
@@ -250,7 +250,7 @@ func (v *Variable) AllAttribs() map[string]string {
 		return map[string]string{}
 	}
 	if v.file.ds == nil {
-		v.file.err = fmt.Errorf("No file opened")
+		v.file.err = fmt.Errorf("no file opened")
 		return map[string]string{}
 	}
 	if v.Attrs == nil {
@@ -266,7 +266,7 @@ func (v *Variable) Attrib(name string) string {
 		return ""
 	}
 	if v.file.ds == nil {
-		v.file.err = fmt.Errorf("No file opened")
+		v.file.err = fmt.Errorf("no file opened")
 		return ""
 	}
 	if v.Attrs == nil {
@@ -427,7 +427,7 @@ func (data *File) Open(filename string) {
 		return
 	}
 	if data.ds != nil {
-		data.err = fmt.Errorf("File already open")
+		data.err = fmt.Errorf("file already open")
 		return
 	}
 
