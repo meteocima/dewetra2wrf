@@ -1,5 +1,6 @@
 package obsreader
 
+/*
 import (
 	"encoding/json"
 	"io/ioutil"
@@ -11,14 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-/*
-{
-	"sensorClass": "PLUVIOMETRO",
-    "from": "202003301800",
-    "to": "202003310001",
-    "ids": ["479124536_2", "479072112_2"]
-}
-*/
 
 func TestMatchDownloadedData(t *testing.T) {
 	pressure := testutil.GetResultsFile(t, "BAROMETRO.json")
@@ -44,7 +37,6 @@ func TestMatchDownloadedData(t *testing.T) {
 	assert.Equal(t, results[0].HumidityAvg, sensor.Value(75.00000))
 	assert.Equal(t, results[0].WinddirAvg, sensor.Value(292.00000))
 	assert.Equal(t, results[0].Metric.TempAvg, sensor.Value(13.00000))
-	//assert.True(t, math.IsNaN(float64(results[0].Metric.DewptAvg)))
 	assert.Equal(t, results[0].Metric.WindspeedAvg, sensor.Value(0.60000))
 	assert.True(t, math.IsNaN(float64(results[0].Metric.Pressure)))
 	assert.Equal(t, results[0].Metric.PrecipTotal, sensor.Value(0.00000))
@@ -60,6 +52,6 @@ func TestSensorValueUnmarshalNaN(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.True(t, math.IsNaN(observations[0].Metric.Pressure.AsFloat()))
-	//fmt.Println(string(resultsBuff))
 
 }
+*/

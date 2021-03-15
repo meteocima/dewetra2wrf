@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/meteocima/dewetra2wrf/obsreader/elevations"
+	"github.com/meteocima/dewetra2wrf/elevations"
 	"github.com/meteocima/dewetra2wrf/sensor"
 )
 

@@ -10,9 +10,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/meteocima/dewetra2wrf/obsreader/elevations"
-	"github.com/meteocima/dewetra2wrf/obsreader/wunderground"
+	"github.com/meteocima/dewetra2wrf/elevations"
 	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/wunderground"
 )
 
 /*
