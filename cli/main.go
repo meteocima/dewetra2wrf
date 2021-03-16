@@ -1,4 +1,4 @@
-// This module implement a console command
+// This module implements a console command
 // that can be used to convert observation
 // as returned from webdrops API to ascii
 // WRF format.
