@@ -1,4 +1,6 @@
-package elevations
+// package ncdf implements a netcdf file readers
+// that can cache variables.
+package ncdf
 
 import (
 	"fmt"

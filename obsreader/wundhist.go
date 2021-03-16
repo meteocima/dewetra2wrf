@@ -11,13 +11,12 @@ import (
 	"github.com/meteocima/dewetra2wrf/types"
 )
 
-// This file contains a ObsReader that reads
+// WundHistObsReader reads
 // observations from JSON files as returned
 // from wunderground 'historical' web API.
-
 type WundHistObsReader struct{}
 
-// ReadAll implements ObsReader
+// ReadAll implements ObsReader for WundHistObsReader
 func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error) {
 	dateDir := filepath.Join(dataPath, date.Format("2006010215"))
 	files, err := ioutil.ReadDir(dateDir)
@@ -32,7 +31,7 @@ func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date ti
 			return nil, err
 		}
 		var obsList struct {
-			Observations []types.WundObs
+			Observations []types.Observation
 		}
 
 		err = json.Unmarshal(obsBuf, &obsList)
@@ -43,24 +42,15 @@ func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date ti
 		if len(obsList.Observations) == 0 {
 			continue
 		}
-		var obs types.WundObs = obsList.Observations[0]
+		var obs types.Observation = obsList.Observations[0]
 
 		if obs.Lat <= domain.MaxLat && obs.Lat >= domain.MinLat &&
 			obs.Lon <= domain.MaxLon && obs.Lon >= domain.MinLon {
 
-			/*
-
-
-
-			 */
 			minDeltaMin := 30.0
 			for _, o := range obsList.Observations {
-				dtObs, err := time.Parse(time.RFC3339, o.ObsTimeUtc)
-				if err != nil {
-					return nil, err
-				}
 
-				delta := math.Abs(date.Sub(dtObs).Minutes())
+				delta := math.Abs(date.Sub(o.ObsTimeUtc).Minutes())
 				if delta < minDeltaMin {
 					minDeltaMin = delta
 					obs = o
@@ -70,40 +60,17 @@ func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date ti
 				}
 			}
 
-			/*
-
-
-
-
-			 */
-			dt, err := time.Parse(time.RFC3339, obs.ObsTimeUtc)
-			if err != nil {
-				return nil, err
-			}
-			resObs := types.Observation{
-				Elevation:   elevations.GetFromCoord(obs.Lat, obs.Lon),
-				StationID:   obs.StationID,
-				StationName: obs.StationID,
-				HumidityAvg: types.Value(obs.HumidityAvg),
-				Lat:         obs.Lat,
-				Lon:         obs.Lon,
-				ObsTimeUtc:  dt,
-				WinddirAvg:  types.Value(obs.WinddirAvg),
-				Metric: types.ObservationMetric{
-					WindspeedAvg: types.Value(obs.Metric.WindspeedAvg),
-					TempAvg:      types.Value(obs.Metric.TempAvg),
-					Pressure:     types.Value((obs.Metric.PressureMax + obs.Metric.PressureMin) / 2),
-					PrecipTotal:  types.Value(obs.Metric.PrecipTotal),
-				},
-			}
+			obs.Elevation = elevations.GetFromCoord(obs.Lat, obs.Lon)
+			obs.StationName = obs.StationID
+			obs.Metric.Pressure = types.Value((obs.Metric.PressureMax + obs.Metric.PressureMin) / 2)
 			// convert temperatures from °celsius to °kelvin
-			resObs.Metric.TempAvg += 273.15
+			obs.Metric.TempAvg += 273.15
 			// convert wind speed from km/h into m/s
-			resObs.Metric.WindspeedAvg *= 0.277778
+			obs.Metric.WindspeedAvg *= 0.277778
 			// convert pressure from mbar into Pa
-			resObs.Metric.Pressure *= 100
+			obs.Metric.Pressure *= 100
 
-			observations = append(observations, resObs)
+			observations = append(observations, obs)
 		}
 
 	}

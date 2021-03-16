@@ -14,13 +14,12 @@ import (
 	"github.com/meteocima/dewetra2wrf/types"
 )
 
-// This file contains a ObsReader that reads
-// observations from JSON files as downloaded
-// from webdrops.
-
+// WebdropsObsReader is a struct that implements ObsReader
+// and that reads observations from JSON files as downloaded
+// from "webdrops" CIMA service.
 type WebdropsObsReader struct{}
 
-// ReadAll implements ObsReader
+// ReadAll implements ObsReader for WebdropsObsReader
 func (r WebdropsObsReader) ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error) {
 
 	relativeHumidity, err := readRelativeHumidity(dataPath, domain, date)
@@ -53,7 +52,7 @@ func (r WebdropsObsReader) ReadAll(dataPath string, domain types.Domain, date ti
 		return nil, err
 	}
 
-	return MergeObservations(dataPath, domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
+	return mergeObservations(dataPath, domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }
 
 func readRelativeHumidity(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
@@ -152,8 +151,8 @@ func readDewetraSensor(dataPath string, domain types.Domain, sensorClass string,
 	return sensorObservations, nil
 }
 
-// MergeObservations is
-func MergeObservations(dataPath string, domain types.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []types.Result) ([]types.Observation, error) {
+// mergeObservations is
+func mergeObservations(dataPath string, domain types.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []types.Result) ([]types.Observation, error) {
 	pressureIdx := 0
 	relativeHumidityIdx := 0
 	temperatureIdx := 0

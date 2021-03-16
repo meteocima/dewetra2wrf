@@ -14,13 +14,14 @@ type Result struct {
 	ID      string
 }
 
-// ObservationMetric is
-type ObservationMetric struct {
-	TempAvg Value
-	//DewptAvg     Value
-	WindspeedAvg Value
-	Pressure     Value
-	PrecipTotal  Value
+// SensorValue returns the value
+// contained in this Result instance, or NaN()
+// if not value is present.
+func (result Result) SensorValue() Value {
+	if result.Value == -9998 {
+		return NaN()
+	}
+	return Value(result.Value)
 }
 
 // Observation represents data for all sensor classes of
@@ -36,23 +37,16 @@ type Observation struct {
 	Metric      ObservationMetric
 }
 
-type WundObsMetric struct {
-	DewptAvg     float64
-	PressureMin  float64
-	PressureMax  float64
-	TempAvg      float64
-	WindspeedAvg float64
-	PrecipTotal  float64
-}
-
-type WundObs struct {
-	HumidityAvg float64
-	Lat         float64
-	Lon         float64
-	WinddirAvg  float64
-	ObsTimeUtc  string
-	StationID   string
-	Metric      WundObsMetric
+// ObservationMetric contains a subset of values
+// contained in an Observation
+type ObservationMetric struct {
+	TempAvg      Value
+	DewptAvg     Value
+	WindspeedAvg Value
+	Pressure     Value
+	PrecipTotal  Value
+	PressureMin  Value
+	PressureMax  Value
 }
 
 // SortKey returns a string used to sort observations

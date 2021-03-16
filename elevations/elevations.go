@@ -1,30 +1,36 @@
+// package elevations contains a single function
+// that returns elevation at specified latitude:longitude
+// according to an orografy dataset contained at
+// ~/.dewetra2wrf/orog.nc
 package elevations
 
 import (
 	"os"
 	"path"
+
+	"github.com/meteocima/dewetra2wrf/elevations/internal/ncdf"
 )
 
-type ElevationsFile struct {
+type elevationsFile struct {
 	xs, ys []float64
 	zs     []int32
 }
 
-var elev *ElevationsFile = openElevationsFile()
+var elev *elevationsFile = openElevationsFile()
 
-func openElevationsFile() *ElevationsFile {
+func openElevationsFile() *elevationsFile {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 	orog := path.Join(home, ".dewetra2wrf", "orog.nc")
-	f := File{}
+	f := ncdf.File{}
 	f.Open(orog)
 	defer f.Close()
 	x := f.Var("x")
 	y := f.Var("y")
 	z := f.Var("z")
-	e := &ElevationsFile{
+	e := &elevationsFile{
 		xs: x.ValuesFloat64(),
 		ys: y.ValuesFloat64(),
 		zs: z.ValuesInt32(),
@@ -37,6 +43,7 @@ func openElevationsFile() *ElevationsFile {
 
 }
 
+// GetFromCoord returns elevation at specified lat:lon
 func GetFromCoord(lat, lon float64) float64 {
 	ypos := int((0.5 + lat/180) * float64(len(elev.ys)))
 	xpos := int((0.5 + lon/360) * float64(len(elev.xs)))

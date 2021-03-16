@@ -20,7 +20,7 @@ func TestMatchDownloadedData(t *testing.T) {
 	windSpeed := testutil.GetResultsFile(t, "ANEMOMETRO.json")
 	windDirection := testutil.GetResultsFile(t, "DIREZIONEVENTO.json")
 	temperature := testutil.GetResultsFile(t, "TERMOMETRO.json")
-	results, err := MergeObservations(testutil.FixtureDir("anagr"), types.Domain{
+	results, err := mergeObservations(testutil.FixtureDir("anagr"), types.Domain{
 		MinLat: -180,
 		MaxLat: 180,
 		MinLon: -90,

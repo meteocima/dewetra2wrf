@@ -5,11 +5,18 @@ import (
 	"strings"
 )
 
-// Domain is
+// Domain is a struct that represents a geographic
+// area, delimited on latitude and longitued
+// by max and min values.
 type Domain struct {
 	MinLat, MinLon, MaxLat, MaxLon float64
 }
 
+// DomainFromS returns a new Domain pointer
+// accordingly to the given string, that must
+// contains  MinLat,MaxLat,MinLon,MaxLon values,
+// in that sequence, separated by commas and
+// represented as floats.
 func DomainFromS(s string) (*Domain, error) {
 	coords := strings.Split(s, ",")
 
