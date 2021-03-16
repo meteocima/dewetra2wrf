@@ -1,3 +1,22 @@
+// This module implement a console command
+// that can be used to convert observation
+// as returned from webdrops API to ascii
+// WRF format.
+//
+// Usage of `d2w`:
+//	 d2w [options]
+// Options:
+//   -date string
+//         date and hour of the data to download [YYYYMMDDHH]
+//   -domain string
+//         domain to filter stations to download [MinLat,MaxLat,MinLon,MaxLon]
+//   -format string
+//         format of input files (DEWETRA or WUNDERGROUND) (default ".")
+//   -input string
+//         where to read input files (default ".")
+//   -outfile string
+//         where to save converted file (default "./out")
+//
 package main
 
 import (
