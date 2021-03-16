@@ -318,15 +318,10 @@ func fillSensorsMap(dataPath string, domain types.Domain, sensorClass string, se
 		return err
 	}
 
-	elevations, err := elevations.OpenElevationsFile(dataPath)
-	if err != nil {
-		return err
-	}
-
 	for _, sensor := range sensorsAnag {
 		if sensor.Lat >= domain.MinLat && sensor.Lat <= domain.MaxLat &&
 			sensor.Lng >= domain.MinLon && sensor.Lng <= domain.MaxLon {
-			sensor.Elevation = elevations.GetElevation(sensor.Lat, sensor.Lng)
+			sensor.Elevation = elevations.GetFromCoord(sensor.Lat, sensor.Lng)
 			if _, exists := sensorsTable[sensor.ID]; exists {
 				return fmt.Errorf("sensor exists with id %s", sensor.ID)
 			}

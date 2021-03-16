@@ -1,3 +1,15 @@
+// This module implements conversion of a types.Observation into
+// a string of three lines.
+// Text is formatted according to WRF ob.ascii text format,
+// which is described by this FORTRAN specification:
+//
+// 	INFO  = PLATFORM, DATE, NAME, LEVELS, LATITUDE, LONGITUDE, ELEVATION, ID.
+// 	SRFC  = SLP, PW (DATA,qc,ERROR).
+// 	EACH  = PRES, SPEED, DIR, HEIGHT, TEMP, DEW PT, HUMID (DATA,qc,ERROR)*LEVELS.
+// 	INFO_FMT = (A12,1X,A19,1X,A40,1X,I6,3(F12.3,11X),6X,A40)
+// 	SRFC_FMT = (F12.3,I4,F7.2,F12.3,I4,F7.3)
+// 	EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))
+//
 package conversion
 
 import (
@@ -10,8 +22,8 @@ import (
 	"github.com/meteocima/dewetra2wrf/types"
 )
 
-// QC is
-const QC = 0
+// qc is
+const qc = 0
 
 func str(s string, ln int) string {
 	strFmt := fmt.Sprintf("%%-%ds", ln)
@@ -46,7 +58,7 @@ func date(dt time.Time) string {
 }
 
 func dataQCError(data string, err float64) string {
-	qc := QC
+	qc := qc
 	if strings.Contains(data, "-888") {
 		qc = -88
 	}
@@ -57,7 +69,7 @@ func dataQCError(data string, err float64) string {
 }
 
 func dataQCError3(data string, err float64) string {
-	qc := QC
+	qc := qc
 	if strings.Contains(data, "-888") {
 		qc = -88
 	}
@@ -79,14 +91,7 @@ func onlyletters(s string) string {
 	return res
 }
 
-//INFO  = PLATFORM, DATE, NAME, LEVELS, LATITUDE, LONGITUDE, ELEVATION, ID.
-//SRFC  = SLP, PW (DATA,QC,ERROR).
-//EACH  = PRES, SPEED, DIR, HEIGHT, TEMP, DEW PT, HUMID (DATA,QC,ERROR)*LEVELS.
-//INFO_FMT = (A12,1X,A19,1X,A40,1X,I6,3(F12.3,11X),6X,A40)
-//SRFC_FMT = (F12.3,I4,F7.2,F12.3,I4,F7.3)
-//EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))
-
-// ToWRFASCII is
+// ToWRFASCII converts a types.Observation into a string
 func ToWRFASCII(obs types.Observation) string {
 	firstLine :=
 		str("FM-12 SYNOP", 12) +

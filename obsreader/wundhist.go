@@ -25,10 +25,7 @@ func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date ti
 		return nil, err
 	}
 	observations := []types.Observation{}
-	elevations, err := elevations.OpenElevationsFile(dataPath)
-	if err != nil {
-		return nil, err
-	}
+
 	for _, f := range files {
 		obsBuf, err := ioutil.ReadFile(filepath.Join(dateDir, f.Name()))
 		if err != nil {
@@ -84,7 +81,7 @@ func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date ti
 				return nil, err
 			}
 			resObs := types.Observation{
-				Elevation:   elevations.GetElevation(obs.Lat, obs.Lon),
+				Elevation:   elevations.GetFromCoord(obs.Lat, obs.Lon),
 				StationID:   obs.StationID,
 				StationName: obs.StationID,
 				HumidityAvg: types.Value(obs.HumidityAvg),
