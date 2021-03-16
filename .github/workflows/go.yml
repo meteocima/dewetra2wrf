@@ -23,8 +23,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        go test -race -covermode atomic -coverprofile=covprofile ./...
-        kill %1
+        sudo apt install libnetcdf-dev
 
     - name: Test
       run: |
