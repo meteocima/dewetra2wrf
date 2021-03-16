@@ -9,7 +9,7 @@ import (
 
 	"github.com/meteocima/dewetra2wrf/conversion"
 	"github.com/meteocima/dewetra2wrf/obsreader"
-	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/types"
 )
 
 // InputFormat ...
@@ -98,7 +98,7 @@ func Convert(format InputFormat, dataPath string, domainS string, date time.Time
 		An init function previously calculate the position of every sensor variable in the file.
 	*/
 
-	domainP, err := sensor.DomainFromS(domainS)
+	domainP, err := types.DomainFromS(domainS)
 	if err != nil {
 		panic(err)
 	}

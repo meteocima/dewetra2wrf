@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/meteocima/dewetra2wrf/elevations"
-	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/types"
 )
 
 // This file contains a ObsReader that reads
@@ -17,13 +17,13 @@ import (
 type WundCurrentObsReader struct{}
 
 // ReadAll implements ObsReader
-func (r WundCurrentObsReader) ReadAll(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
+func (r WundCurrentObsReader) ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error) {
 	dateDir := filepath.Join(dataPath, date.Format("2006010215"))
 	files, err := ioutil.ReadDir(dateDir)
 	if err != nil {
 		return nil, err
 	}
-	observations := []sensor.Observation{}
+	observations := []types.Observation{}
 	elevations, err := elevations.OpenElevationsFile(dataPath)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (r WundCurrentObsReader) ReadAll(dataPath string, domain sensor.Domain, dat
 		if err != nil {
 			return nil, err
 		}
-		var obs sensor.WundObs
+		var obs types.WundObs
 		err = json.Unmarshal(obsBuf, &obs)
 		if err != nil {
 			return nil, err
@@ -45,20 +45,20 @@ func (r WundCurrentObsReader) ReadAll(dataPath string, domain sensor.Domain, dat
 			if err != nil {
 				return nil, err
 			}
-			resObs := sensor.Observation{
+			resObs := types.Observation{
 				Elevation:   elevations.GetElevation(obs.Lat, obs.Lon),
 				StationID:   obs.StationID,
 				StationName: obs.StationID,
-				HumidityAvg: sensor.Value(obs.HumidityAvg),
+				HumidityAvg: types.Value(obs.HumidityAvg),
 				Lat:         obs.Lat,
 				Lon:         obs.Lon,
 				ObsTimeUtc:  dt,
-				WinddirAvg:  sensor.Value(obs.WinddirAvg),
-				Metric: sensor.ObservationMetric{
-					WindspeedAvg: sensor.Value(obs.Metric.WindspeedAvg),
-					TempAvg:      sensor.Value(obs.Metric.TempAvg),
-					Pressure:     sensor.Value((obs.Metric.PressureMax + obs.Metric.PressureMin) / 2),
-					PrecipTotal:  sensor.Value(obs.Metric.PrecipTotal),
+				WinddirAvg:  types.Value(obs.WinddirAvg),
+				Metric: types.ObservationMetric{
+					WindspeedAvg: types.Value(obs.Metric.WindspeedAvg),
+					TempAvg:      types.Value(obs.Metric.TempAvg),
+					Pressure:     types.Value((obs.Metric.PressureMax + obs.Metric.PressureMin) / 2),
+					PrecipTotal:  types.Value(obs.Metric.PrecipTotal),
 				},
 			}
 			// convert temperatures from °celsius to °kelvin

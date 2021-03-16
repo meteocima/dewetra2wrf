@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/types"
 )
 
 // QC is
@@ -28,7 +28,7 @@ func integer(i int, len int) string {
 	return fmt.Sprintf(strFmt, intS)
 }
 
-func num(f sensor.Value, len float64) string {
+func num(f types.Value, len float64) string {
 	if f.IsNaN() {
 		f = -888888.0
 	}
@@ -53,7 +53,7 @@ func dataQCError(data string, err float64) string {
 
 	return data +
 		integer(qc, 4) +
-		num(sensor.Value(err), 7.2)
+		num(types.Value(err), 7.2)
 }
 
 func dataQCError3(data string, err float64) string {
@@ -64,7 +64,7 @@ func dataQCError3(data string, err float64) string {
 
 	return data +
 		integer(qc, 4) +
-		num(sensor.Value(err), 7.3)
+		num(types.Value(err), 7.3)
 }
 
 func onlyletters(s string) string {
@@ -87,7 +87,7 @@ func onlyletters(s string) string {
 //EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))
 
 // ToWRFASCII is
-func ToWRFASCII(obs sensor.Observation) string {
+func ToWRFASCII(obs types.Observation) string {
 	firstLine :=
 		str("FM-12 SYNOP", 12) +
 			" " +
@@ -96,17 +96,17 @@ func ToWRFASCII(obs sensor.Observation) string {
 			str(onlyletters(obs.StationName), 40) +
 			" " +
 			integer(1, 6) +
-			num(sensor.Value(obs.Lat), 12.3) +
+			num(types.Value(obs.Lat), 12.3) +
 			space(11) +
-			num(sensor.Value(obs.Lon), 12.3) +
+			num(types.Value(obs.Lon), 12.3) +
 			space(11) +
-			num(sensor.Value(obs.Elevation), 12.3) +
+			num(types.Value(obs.Elevation), 12.3) +
 			space(11) +
 			space(6) +
 			str(onlyletters(obs.StationID), 40)
 
-	surfaceLevelPressure := sensor.NaN()
-	precipTotal := sensor.NaN() // obs.Metric.PrecipTotal
+	surfaceLevelPressure := types.NaN()
+	precipTotal := types.NaN() // obs.Metric.PrecipTotal
 
 	secondLine :=
 		dataQCError(num(surfaceLevelPressure, 12.3), 99.99) +
@@ -117,9 +117,9 @@ func ToWRFASCII(obs sensor.Observation) string {
 			dataQCError(num(obs.Metric.WindspeedAvg, 12.3), 1.0) +
 			dataQCError(num(obs.WinddirAvg, 12.3), 3.0) +
 			space(11) +
-			dataQCError(num(sensor.NaN(), 12.3), 999.99) + //dataQCError(num(sensor.Value(obs.Elevation), 12.3), 999.99) +
+			dataQCError(num(types.NaN(), 12.3), 999.99) + //dataQCError(num(types.Value(obs.Elevation), 12.3), 999.99) +
 			dataQCError(num(obs.Metric.TempAvg, 12.3), 1.0) +
-			dataQCError(num(sensor.NaN(), 12.3), 1.0) + //dataQCError(num(obs.Metric.DewptAvg, 12.3), 1.0) +
+			dataQCError(num(types.NaN(), 12.3), 1.0) + //dataQCError(num(obs.Metric.DewptAvg, 12.3), 1.0) +
 			space(11) +
 			dataQCError(num(obs.HumidityAvg, 12.3), 2)
 

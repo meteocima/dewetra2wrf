@@ -7,7 +7,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/types"
 	"github.com/meteocima/dewetra2wrf/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +20,7 @@ func TestMatchDownloadedData(t *testing.T) {
 	windSpeed := testutil.GetResultsFile(t, "ANEMOMETRO.json")
 	windDirection := testutil.GetResultsFile(t, "DIREZIONEVENTO.json")
 	temperature := testutil.GetResultsFile(t, "TERMOMETRO.json")
-	results, err := MergeObservations(testutil.FixtureDir("anagr"), sensor.Domain{
+	results, err := MergeObservations(testutil.FixtureDir("anagr"), types.Domain{
 		MinLat: -180,
 		MaxLat: 180,
 		MinLon: -90,
@@ -34,12 +34,12 @@ func TestMatchDownloadedData(t *testing.T) {
 	assert.Equal(t, results[0].ObsTimeUtc, testutil.MustParseISO("2020-03-30T18:00:00Z"))
 	assert.Equal(t, results[0].Lat, 41.469000)
 	assert.Equal(t, results[0].Lon, 15.483167)
-	assert.Equal(t, results[0].HumidityAvg, sensor.Value(75.00000))
-	assert.Equal(t, results[0].WinddirAvg, sensor.Value(292.00000))
-	assert.Equal(t, results[0].Metric.TempAvg, sensor.Value(13.00000))
-	assert.Equal(t, results[0].Metric.WindspeedAvg, sensor.Value(0.60000))
+	assert.Equal(t, results[0].HumidityAvg, types.Value(75.00000))
+	assert.Equal(t, results[0].WinddirAvg, types.Value(292.00000))
+	assert.Equal(t, results[0].Metric.TempAvg, types.Value(13.00000))
+	assert.Equal(t, results[0].Metric.WindspeedAvg, types.Value(0.60000))
 	assert.True(t, math.IsNaN(float64(results[0].Metric.Pressure)))
-	assert.Equal(t, results[0].Metric.PrecipTotal, sensor.Value(0.00000))
+	assert.Equal(t, results[0].Metric.PrecipTotal, types.Value(0.00000))
 
 }
 
@@ -47,7 +47,7 @@ func TestSensorValueUnmarshalNaN(t *testing.T) {
 	buff, err := ioutil.ReadFile(testutil.FixtureDir("expected-download-results.json"))
 	assert.NoError(t, err)
 
-	var observations []sensor.Observation
+	var observations []types.Observation
 	err = json.Unmarshal(buff, &observations)
 	assert.NoError(t, err)
 

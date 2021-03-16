@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/meteocima/dewetra2wrf/elevations"
-	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/types"
 )
 
 type ObsReader interface {
-	ReadAll(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error)
+	ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error)
 }
 
 /*
@@ -53,7 +53,7 @@ type sensorAnag struct {
 	Lng, Lat, Elevation float64
 }
 
-func observationIsLess(this, that sensor.Result) bool {
+func observationIsLess(this, that types.Result) bool {
 	if that.SortKey == "zzzzzzzzzzzz" {
 		return true
 	}
@@ -66,8 +66,8 @@ func observationIsLess(this, that sensor.Result) bool {
 	return this.SortKey < that.SortKey
 }
 
-func minObservation(results ...sensor.Result) sensor.Result {
-	min := sensor.Result{SortKey: "zzzzzzzzzzzz"}
+func minObservation(results ...types.Result) types.Result {
+	min := types.Result{SortKey: "zzzzzzzzzzzz"}
 	for _, result := range results {
 		if observationIsLess(result, min) {
 			min = result
@@ -104,7 +104,7 @@ func (bn byName) Swap(i, j int) {
 */
 
 // MergeObservations is
-func MergeObservations(dataPath string, domain sensor.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []sensor.Result) ([]sensor.Observation, error) {
+func MergeObservations(dataPath string, domain types.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []types.Result) ([]types.Observation, error) {
 	pressureIdx := 0
 	relativeHumidityIdx := 0
 	temperatureIdx := 0
@@ -112,7 +112,7 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 	windSpeedIdx := 0
 	precipitableWaterIdx := 0
 
-	results := []sensor.Observation{}
+	results := []types.Observation{}
 
 	sensorsTable, err := openCompleteSensorsMap(dataPath, domain)
 	if err != nil {
@@ -120,42 +120,42 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 	}
 
 	for {
-		var pressureItem sensor.Result
+		var pressureItem types.Result
 		if len(pressure) > pressureIdx {
 			pressureItem = pressure[pressureIdx]
 		} else {
 			pressureItem.SortKey = "zzzzzzzzzzzz"
 		}
 
-		var relativeHumidityItem sensor.Result
+		var relativeHumidityItem types.Result
 		if len(relativeHumidity) > relativeHumidityIdx {
 			relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
 		} else {
 			relativeHumidityItem.SortKey = "zzzzzzzzzzzz"
 		}
 
-		var temperatureItem sensor.Result
+		var temperatureItem types.Result
 		if len(temperature) > temperatureIdx {
 			temperatureItem = temperature[temperatureIdx]
 		} else {
 			temperatureItem.SortKey = "zzzzzzzzzzzz"
 		}
 
-		var windDirectionItem sensor.Result
+		var windDirectionItem types.Result
 		if len(windDirection) > windDirectionIdx {
 			windDirectionItem = windDirection[windDirectionIdx]
 		} else {
 			windDirectionItem.SortKey = "zzzzzzzzzzzz"
 		}
 
-		var windSpeedItem sensor.Result
+		var windSpeedItem types.Result
 		if len(windSpeed) > windSpeedIdx {
 			windSpeedItem = windSpeed[windSpeedIdx]
 		} else {
 			windSpeedItem.SortKey = "zzzzzzzzzzzz"
 		}
 
-		var precipitableWaterItem sensor.Result
+		var precipitableWaterItem types.Result
 		if len(precipitableWater) > precipitableWaterIdx {
 			precipitableWaterItem = precipitableWater[precipitableWaterIdx]
 		} else {
@@ -174,21 +174,21 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 		minItem := minObservation(pressureItem, relativeHumidityItem, temperatureItem, windDirectionItem, windSpeedItem, precipitableWaterItem)
 		station := sensorsTable[minItem.ID]
 
-		currentObs := sensor.Observation{
+		currentObs := types.Observation{
 			ObsTimeUtc:  minItem.At,
 			StationID:   station.ID,
 			StationName: station.Name,
 			Lat:         station.Lat,
 			Lon:         station.Lng,
-			HumidityAvg: sensor.NaN(),
-			WinddirAvg:  sensor.NaN(),
+			HumidityAvg: types.NaN(),
+			WinddirAvg:  types.NaN(),
 			Elevation:   station.Elevation,
-			Metric: sensor.ObservationMetric{
-				//DewptAvg:     sensor.NaN(),
-				PrecipTotal:  sensor.NaN(),
-				Pressure:     sensor.NaN(),
-				TempAvg:      sensor.NaN(),
-				WindspeedAvg: sensor.NaN(),
+			Metric: types.ObservationMetric{
+				//DewptAvg:     types.NaN(),
+				PrecipTotal:  types.NaN(),
+				Pressure:     types.NaN(),
+				TempAvg:      types.NaN(),
+				WindspeedAvg: types.NaN(),
 			},
 		}
 
@@ -209,7 +209,7 @@ func MergeObservations(dataPath string, domain sensor.Domain, pressure, relative
 
 		if windSpeedItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
 
-			var value sensor.Value
+			var value types.Value
 
 			wsSensor := sensorsTable[windSpeedItem.ID]
 
@@ -276,7 +276,7 @@ var standardValues = []standardPressure{
 	{25000, math.NaN(), 2549, math.NaN()},
 }
 
-func standardAtmosphere(elevation float64) sensor.Value {
+func standardAtmosphere(elevation float64) types.Value {
 	var level standardPressure
 	for _, level = range standardValues {
 		if level.altMin <= elevation && (math.IsNaN(level.altMax) || level.altMax > elevation) {
@@ -288,10 +288,10 @@ func standardAtmosphere(elevation float64) sensor.Value {
 
 	result := y0 + (elevation-x0)*(y1-y0)/(x1-x0)
 
-	return sensor.Value(result / 100)
+	return types.Value(result / 100)
 }
 
-func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (map[string]sensorAnag, error) {
+func openSensorsMap(dataPath string, domain types.Domain, sensorClass string) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
 	//fmt.Println("openSensorsMap", sensorClass, domain)
 
@@ -303,7 +303,7 @@ func openSensorsMap(dataPath string, domain sensor.Domain, sensorClass string) (
 	return sensorsTable, nil
 }
 
-func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {
+func fillSensorsMap(dataPath string, domain types.Domain, sensorClass string, sensorsTable map[string]sensorAnag) error {
 	//fmt.Printf("fillSensorsMap %s\n", sensorClass)
 
 	sensorsAnag := []sensorAnag{}
@@ -339,7 +339,7 @@ func fillSensorsMap(dataPath string, domain sensor.Domain, sensorClass string, s
 	return nil
 }
 
-func openCompleteSensorsMap(dataPath string, domain sensor.Domain) (map[string]sensorAnag, error) {
+func openCompleteSensorsMap(dataPath string, domain types.Domain) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
 
 	//fmt.Println("openCompleteSensorsMap", domain)

@@ -1,4 +1,4 @@
-package sensor
+package types
 
 import (
 	"strconv"

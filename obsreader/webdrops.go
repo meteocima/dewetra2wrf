@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/meteocima/dewetra2wrf/sensor"
+	"github.com/meteocima/dewetra2wrf/types"
 )
 
 // This file contains a ObsReader that reads
@@ -19,7 +19,7 @@ import (
 type WebdropsObsReader struct{}
 
 // ReadAll implements ObsReader
-func (r WebdropsObsReader) ReadAll(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Observation, error) {
+func (r WebdropsObsReader) ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error) {
 
 	relativeHumidity, err := readRelativeHumidity(dataPath, domain, date)
 	if err != nil {
@@ -54,37 +54,37 @@ func (r WebdropsObsReader) ReadAll(dataPath string, domain sensor.Domain, date t
 	return MergeObservations(dataPath, domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
 }
 
-func readRelativeHumidity(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+func readRelativeHumidity(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "IGROMETRO", date)
 }
 
-func readTemperature(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+func readTemperature(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "TERMOMETRO", date)
 }
 
-func readWindDirection(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+func readWindDirection(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "DIREZIONEVENTO", date)
 }
 
-func readWindSpeed(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+func readWindSpeed(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "ANEMOMETRO", date)
 }
 
-func readPrecipitableWater(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+func readPrecipitableWater(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "PLUVIOMETRO", date)
 }
 
-func readPressure(dataPath string, domain sensor.Domain, date time.Time) ([]sensor.Result, error) {
+func readPressure(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "BAROMETRO", date)
 }
 
-func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string, date time.Time) ([]sensor.Result, error) {
+func readDewetraSensor(dataPath string, domain types.Domain, sensorClass string, date time.Time) ([]types.Result, error) {
 
 	content, err := ioutil.ReadFile(filepath.Join(dataPath, sensorClass+".json"))
 	if err != nil {
 		return nil, err
 	}
-	sensorObservations := []sensor.Result{}
+	sensorObservations := []types.Result{}
 	observationLess := func(i, j int) bool {
 		if sensorObservations[i].SortKey == sensorObservations[j].SortKey {
 			return sensorObservations[i].At.Unix() < sensorObservations[j].At.Unix()
@@ -104,7 +104,7 @@ func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string
 		return nil, err
 	}
 
-	betterTimed := map[string]sensor.Result{}
+	betterTimed := map[string]types.Result{}
 
 	for _, sens := range data {
 		sensAnag, ok := sensorsTable[sens.SensorID]
@@ -129,7 +129,7 @@ func readDewetraSensor(dataPath string, domain sensor.Domain, sensorClass string
 			_, _, _ = dateS, atS, betterS
 
 			if !ok || math.Abs(at.Sub(date).Minutes()) < math.Abs(betterTimedObs.At.Sub(date).Minutes()) {
-				sensorResult := sensor.Result{
+				sensorResult := types.Result{
 					At:      at,
 					Value:   sens.Values[idx],
 					SortKey: sortKey,
