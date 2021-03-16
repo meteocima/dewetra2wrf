@@ -1,6 +1,6 @@
 module github.com/meteocima/dewetra2wrf
 
-go 1.14
+go 1.16
 
 require (
 	github.com/fhs/go-netcdf v1.1.0
