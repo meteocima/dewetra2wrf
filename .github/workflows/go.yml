@@ -24,6 +24,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt install libnetcdf-dev
+        mkdir ~/.dewetra2wrf
+        curl -so ~/.dewetra2wrf/orog.nc https://zenodo.org/record/4607436/files/orog.nc
 
     - name: Test
       run: |
