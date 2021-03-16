@@ -27,6 +27,10 @@ On ubuntu you can install it with:
 sudo apt install libnetcdf-dev
 ```
 
+You can download the orography file from 
+https://zenodo.org/record/4607436/files/orog.nc
+
+
 ## Command line usage
 
 This module implements a console command
