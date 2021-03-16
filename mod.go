@@ -12,7 +12,12 @@ import (
 	"github.com/meteocima/dewetra2wrf/types"
 )
 
-// InputFormat ...
+// InputFormat is an enum that
+// contains all format supported for read
+// of observations.
+// Enum values are able to create appropriates
+// implementations of obsreader.ObsReader
+// using their NewReader() method.
 type InputFormat int
 
 // InputFormat values ...
@@ -22,6 +27,8 @@ const (
 	WunderHistFormat
 )
 
+// NewReader returns a obsreader.ObsReader that
+// read observations stored in this format.
 func (f InputFormat) NewReader() obsreader.ObsReader {
 	if f == DewetraFormat {
 		return obsreader.WebdropsObsReader{}
@@ -41,18 +48,21 @@ func (f InputFormat) NewReader() obsreader.ObsReader {
 
 }
 
-func (f *InputFormat) FromString(s string) {
-	if s == "WUNDERGROUND" {
+// FromString returns a new InputFormat
+// for the format represented in given code
+func (f *InputFormat) FromString(code string) {
+	if code == "WUNDERGROUND" {
 		*f = WundergroundFormat
-	} else if s == "DEWETRA" {
+	} else if code == "DEWETRA" {
 		*f = DewetraFormat
-	} else if s == "WUNDERHIST" {
+	} else if code == "WUNDERHIST" {
 		*f = WunderHistFormat
 	} else {
-		panic("Unknown format " + s)
+		panic("Unknown format " + code)
 	}
 }
 
+// String implements fmt.Stringer for InputFormat
 func (f InputFormat) String() string {
 	if f == DewetraFormat {
 		return "DewetraFormat"
@@ -67,6 +77,38 @@ func (f InputFormat) String() string {
 	}
 
 	return fmt.Sprintf("%d", int(f))
+}
+
+// Convert converts a set of observations, saved in
+// format, contained in inputpath directory or file,
+// reading only data for stations contained in geographicval area
+// defined by domain arg, and skipping observation not occurred
+// within 15 minutes from date.
+// Converted file is saved to outputpath, replacing existing file
+// if any, and using os.FileMode(0644) if the file has to be created.
+func Convert(format InputFormat, inputpath string, domainS string, date time.Time, outputpath string) error {
+	domainP, err := types.DomainFromS(domainS)
+	if err != nil {
+		panic(err)
+	}
+	domain := *domainP
+
+	sensorsObservations, err := format.NewReader().ReadAll(inputpath, domain, date)
+	if err != nil {
+		return err
+	}
+
+	results := make([]string, len(sensorsObservations))
+	for i, result := range sensorsObservations {
+		results[i] = conversion.ToWRFASCII(result)
+	}
+
+	resultsS := strings.Join(results, "\n")
+
+	header := fmt.Sprintf(headerFormat, len(results), len(results))
+
+	return ioutil.WriteFile(outputpath, []byte(header+resultsS), os.FileMode(0644))
+
 }
 
 var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
@@ -90,34 +132,3 @@ var headerFormat = "TOTAL = %6d, MISS. =-888888.,\n" +
 	"SRFC_FMT = (F12.3,I4,F7.2,F12.3,I4,F7.3)\n" +
 	"EACH_FMT = (3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2),11X,3(F12.3,I4,F7.2))\n" +
 	"#------------------------------------------------------------------------------#\n"
-
-func Convert(format InputFormat, dataPath string, domainS string, date time.Time, filename string) error {
-	/*
-		AllSensors returns a chan of sensors read. the sensors variables are emitted in to the chan as soon as
-		all sensor variables are read, and written in the out file at abs locations.
-		An init function previously calculate the position of every sensor variable in the file.
-	*/
-
-	domainP, err := types.DomainFromS(domainS)
-	if err != nil {
-		panic(err)
-	}
-	domain := *domainP
-
-	sensorsObservations, err := format.NewReader().ReadAll(dataPath, domain, date)
-	if err != nil {
-		return err
-	}
-
-	results := make([]string, len(sensorsObservations))
-	for i, result := range sensorsObservations {
-		results[i] = conversion.ToWRFASCII(result)
-	}
-
-	resultsS := strings.Join(results, "\n")
-
-	header := fmt.Sprintf(headerFormat, len(results), len(results))
-
-	return ioutil.WriteFile(filename, []byte(header+resultsS), os.FileMode(0644))
-
-}
