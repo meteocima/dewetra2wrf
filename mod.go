@@ -1,3 +1,10 @@
+// This module is the forefront of a framework
+// of modules that can be used to convert weather
+// stations observations in various format into ascii
+// WRF format.
+// Look at InputFormat for the various input format
+// supported.
+// Conversion can be done using Convert function.
 package dewetra2wrf
 
 import (
