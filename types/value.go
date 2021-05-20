@@ -42,6 +42,11 @@ func (data *Value) UnmarshalJSON(buff []byte) error {
 		*data = Value(math.NaN())
 		return nil
 	}
+	if buffS == "null" {
+		*data = Value(math.NaN())
+		return nil
+	}
+
 	val, err := strconv.ParseFloat(buffS, 64)
 	if err != nil {
 		return err

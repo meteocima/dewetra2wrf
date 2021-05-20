@@ -109,11 +109,10 @@ func writeCols(w io.Writer, values []string) {
 func WriteCSVObservation(w io.Writer, obs types.Observation) {
 	writeCols(w, []string{
 		obs.StationID,
-		obs.StationName,
 		num(types.Value(obs.Lat), 12.3),
-		num(types.Value(obs.Lat), 12.3),
+		num(types.Value(obs.Lon), 12.3),
 		num(types.Value(obs.Elevation), 12.3),
-		obs.ObsTimeUtc.Format("20060102150405"),
+		obs.ObsTimeUtc.Format(time.RFC3339),
 		num(obs.Metric.Pressure, 12.3),
 		num(obs.Metric.PrecipTotal, 12.3),
 		num(obs.HumidityAvg, 12.3),

@@ -18,6 +18,14 @@ type Domain struct {
 // in that sequence, separated by commas and
 // represented as floats.
 func DomainFromS(s string) (*Domain, error) {
+	if s == "" {
+		return &Domain{
+			MinLat: -180,
+			MinLon: -90,
+			MaxLat: 90,
+			MaxLon: 180,
+		}, nil
+	}
 	coords := strings.Split(s, ",")
 
 	MinLat, err := strconv.ParseFloat(coords[0], 64)
