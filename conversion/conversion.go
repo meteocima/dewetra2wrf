@@ -13,7 +13,9 @@
 package conversion
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -89,6 +91,35 @@ func onlyletters(s string) string {
 		}
 	}
 	return res
+}
+
+func writeCols(w io.Writer, values []string) {
+	bufw := bufio.NewWriter(w)
+	defer bufw.Flush()
+	for i, v := range values {
+		if i > 0 {
+			bufw.WriteRune(',')
+		}
+		bufw.WriteString(v)
+	}
+	bufw.WriteRune('\n')
+}
+
+// WriteCSVObservation ...
+func WriteCSVObservation(w io.Writer, obs types.Observation) {
+	writeCols(w, []string{
+		obs.StationID,
+		obs.StationName,
+		num(types.Value(obs.Lat), 12.3),
+		num(types.Value(obs.Lat), 12.3),
+		num(types.Value(obs.Elevation), 12.3),
+		obs.ObsTimeUtc.Format("20060102150405"),
+		num(obs.Metric.Pressure, 12.3),
+		num(obs.Metric.PrecipTotal, 12.3),
+		num(obs.HumidityAvg, 12.3),
+		num(obs.Metric.TempAvg, 12.3),
+		num(obs.Metric.WindspeedAvg, 12.3),
+	})
 }
 
 // ToWRFASCII converts a types.Observation into a string
