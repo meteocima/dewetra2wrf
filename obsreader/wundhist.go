@@ -18,7 +18,7 @@ type WundHistObsReader struct{}
 
 // ReadAll implements ObsReader for WundHistObsReader
 func (r WundHistObsReader) ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error) {
-	dateDir := filepath.Join(dataPath, date.Format("2006010215"))
+	dateDir := filepath.Join(dataPath, date.Format("20060102"))
 	files, err := ioutil.ReadDir(dateDir)
 	if err != nil {
 		return nil, err
