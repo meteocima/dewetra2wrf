@@ -44,7 +44,7 @@ func (r WundCurrentObsReader) ReadAll(dataPath string, domain types.Domain, date
 			obs.Metric.TempAvg += 273.15
 			// convert wind speed from km/h into m/s
 			obs.Metric.WindspeedAvg *= 0.277778
-			// convert pressure from mbar into Pa
+			// convert pressure from hPa into Pa
 			obs.Metric.Pressure *= 100
 
 			observations = append(observations, obs)
