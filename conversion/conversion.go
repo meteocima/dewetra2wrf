@@ -148,15 +148,15 @@ func ToWRFASCII(obs types.Observation) string {
 			dataQCError3(num(precipTotal, 12.3), 99.99)
 
 	thirstLine :=
-		dataQCError(num(obs.Metric.Pressure, 12.3), 1.0) +
-			dataQCError(num(obs.Metric.WindspeedAvg, 12.3), 1.0) +
-			dataQCError(num(obs.WinddirAvg, 12.3), 3.0) +
+		dataQCError(num( /*obs.Metric.Pressure*/ types.NaN(), 12.3), 1.0) +
+			dataQCError(num( /*obs.Metric.WindspeedAvg*/ types.NaN(), 12.3), 1.0) +
+			dataQCError(num( /*obs.WinddirAvg*/ types.NaN(), 12.3), 3.0) +
 			space(11) +
-			dataQCError(num(types.NaN(), 12.3), 999.99) + //dataQCError(num(types.Value(obs.Elevation), 12.3), 999.99) +
+			dataQCError(num(types.Value(obs.Elevation), 12.3), 999.99) +
 			dataQCError(num(obs.Metric.TempAvg, 12.3), 1.0) +
-			dataQCError(num(types.NaN(), 12.3), 1.0) + //dataQCError(num(obs.Metric.DewptAvg, 12.3), 1.0) +
+			dataQCError(num( /*obs.Metric.DewptAvg*/ types.NaN(), 12.3), 1.0) +
 			space(11) +
-			dataQCError(num(obs.HumidityAvg, 12.3), 2)
+			dataQCError(num( /*obs.HumidityAvg*/ types.NaN(), 12.3), 2)
 
 	return firstLine + "\n" + secondLine + "\n" + thirstLine
 }
