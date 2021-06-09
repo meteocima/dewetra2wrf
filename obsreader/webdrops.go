@@ -21,48 +21,50 @@ type WebdropsObsReader struct{}
 
 // ReadAll implements ObsReader for WebdropsObsReader
 func (r WebdropsObsReader) ReadAll(dataPath string, domain types.Domain, date time.Time) ([]types.Observation, error) {
-
-	relativeHumidity, err := readRelativeHumidity(dataPath, domain, date)
-	if err != nil {
-		return nil, err
-	}
-
+	/*
+		relativeHumidity, err := readRelativeHumidity(dataPath, domain, date)
+		if err != nil {
+			return nil, err
+		}
+	*/
 	temperature, err := readTemperature(dataPath, domain, date)
 	if err != nil {
 		return nil, err
 	}
+	/*
+		windDirection, err := readWindDirection(dataPath, domain, date)
+		if err != nil {
+			return nil, err
+		}
 
-	windDirection, err := readWindDirection(dataPath, domain, date)
-	if err != nil {
-		return nil, err
-	}
+		windSpeed, err := readWindSpeed(dataPath, domain, date)
+		if err != nil {
+			return nil, err
+		}
 
-	windSpeed, err := readWindSpeed(dataPath, domain, date)
-	if err != nil {
-		return nil, err
-	}
+		precipitableWater, err := readPrecipitableWater(dataPath, domain, date)
+		if err != nil {
+			return nil, err
+		}
 
-	precipitableWater, err := readPrecipitableWater(dataPath, domain, date)
-	if err != nil {
-		return nil, err
-	}
-
-	pressure, err := readPressure(dataPath, domain, date)
-	if err != nil {
-		return nil, err
-	}
-
-	return mergeObservations(dataPath, domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater)
+		pressure, err := readPressure(dataPath, domain, date)
+		if err != nil {
+			return nil, err
+		}
+	*/
+	return mergeObservations(dataPath, domain /*pressure, relativeHumidity, */, temperature /*, windDirection, windSpeed, precipitableWater*/)
 }
 
+/*
 func readRelativeHumidity(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "IGROMETRO", date)
 }
-
+*/
 func readTemperature(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "TERMOMETRO", date)
 }
 
+/*
 func readWindDirection(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "DIREZIONEVENTO", date)
 }
@@ -78,7 +80,7 @@ func readPrecipitableWater(dataPath string, domain types.Domain, date time.Time)
 func readPressure(dataPath string, domain types.Domain, date time.Time) ([]types.Result, error) {
 	return readDewetraSensor(dataPath, domain, "BAROMETRO", date)
 }
-
+*/
 func readDewetraSensor(dataPath string, domain types.Domain, sensorClass string, date time.Time) ([]types.Result, error) {
 
 	content, err := ioutil.ReadFile(filepath.Join(dataPath, sensorClass+".json"))
@@ -152,13 +154,13 @@ func readDewetraSensor(dataPath string, domain types.Domain, sensorClass string,
 }
 
 // mergeObservations is
-func mergeObservations(dataPath string, domain types.Domain, pressure, relativeHumidity, temperature, windDirection, windSpeed, precipitableWater []types.Result) ([]types.Observation, error) {
-	pressureIdx := 0
-	relativeHumidityIdx := 0
+func mergeObservations(dataPath string, domain types.Domain /*, pressure, relativeHumidity,*/, temperature /*, windDirection, windSpeed, precipitableWater*/ []types.Result) ([]types.Observation, error) {
+	//pressureIdx := 0
+	//relativeHumidityIdx := 0
 	temperatureIdx := 0
-	windDirectionIdx := 0
-	windSpeedIdx := 0
-	precipitableWaterIdx := 0
+	//windDirectionIdx := 0
+	//windSpeedIdx := 0
+	//precipitableWaterIdx := 0
 
 	results := []types.Observation{}
 
@@ -168,58 +170,63 @@ func mergeObservations(dataPath string, domain types.Domain, pressure, relativeH
 	}
 
 	for {
-		var pressureItem types.Result
-		if len(pressure) > pressureIdx {
-			pressureItem = pressure[pressureIdx]
-		} else {
-			pressureItem.SortKey = "zzzzzzzzzzzz"
-		}
+		/*
+			var pressureItem types.Result
+			if len(pressure) > pressureIdx {
+				pressureItem = pressure[pressureIdx]
+			} else {
+				pressureItem.SortKey = "zzzzzzzzzzzz"
+			}
 
-		var relativeHumidityItem types.Result
-		if len(relativeHumidity) > relativeHumidityIdx {
-			relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
-		} else {
-			relativeHumidityItem.SortKey = "zzzzzzzzzzzz"
-		}
-
+			var relativeHumidityItem types.Result
+			if len(relativeHumidity) > relativeHumidityIdx {
+				relativeHumidityItem = relativeHumidity[relativeHumidityIdx]
+			} else {
+				relativeHumidityItem.SortKey = "zzzzzzzzzzzz"
+			}
+		*/
 		var temperatureItem types.Result
 		if len(temperature) > temperatureIdx {
 			temperatureItem = temperature[temperatureIdx]
 		} else {
 			temperatureItem.SortKey = "zzzzzzzzzzzz"
 		}
+		/*
+			var windDirectionItem types.Result
+			if len(windDirection) > windDirectionIdx {
+				windDirectionItem = windDirection[windDirectionIdx]
+			} else {
+				windDirectionItem.SortKey = "zzzzzzzzzzzz"
+			}
 
-		var windDirectionItem types.Result
-		if len(windDirection) > windDirectionIdx {
-			windDirectionItem = windDirection[windDirectionIdx]
-		} else {
-			windDirectionItem.SortKey = "zzzzzzzzzzzz"
-		}
+			var windSpeedItem types.Result
+			if len(windSpeed) > windSpeedIdx {
+				windSpeedItem = windSpeed[windSpeedIdx]
+			} else {
+				windSpeedItem.SortKey = "zzzzzzzzzzzz"
+			}
 
-		var windSpeedItem types.Result
-		if len(windSpeed) > windSpeedIdx {
-			windSpeedItem = windSpeed[windSpeedIdx]
-		} else {
-			windSpeedItem.SortKey = "zzzzzzzzzzzz"
-		}
+			var precipitableWaterItem types.Result
+			if len(precipitableWater) > precipitableWaterIdx {
+				precipitableWaterItem = precipitableWater[precipitableWaterIdx]
+			} else {
+				precipitableWaterItem.SortKey = "zzzzzzzzzzzz"
+			}
 
-		var precipitableWaterItem types.Result
-		if len(precipitableWater) > precipitableWaterIdx {
-			precipitableWaterItem = precipitableWater[precipitableWaterIdx]
-		} else {
-			precipitableWaterItem.SortKey = "zzzzzzzzzzzz"
-		}
-
-		if relativeHumidityItem.SortKey == "zzzzzzzzzzzz" &&
-			temperatureItem.SortKey == "zzzzzzzzzzzz" &&
-			windDirectionItem.SortKey == "zzzzzzzzzzzz" &&
-			windSpeedItem.SortKey == "zzzzzzzzzzzz" &&
-			precipitableWaterItem.SortKey == "zzzzzzzzzzzz" &&
-			pressureItem.SortKey == "zzzzzzzzzzzz" {
+			if relativeHumidityItem.SortKey == "zzzzzzzzzzzz" &&
+				temperatureItem.SortKey == "zzzzzzzzzzzz" &&
+				windDirectionItem.SortKey == "zzzzzzzzzzzz" &&
+				windSpeedItem.SortKey == "zzzzzzzzzzzz" &&
+				precipitableWaterItem.SortKey == "zzzzzzzzzzzz" &&
+				pressureItem.SortKey == "zzzzzzzzzzzz" {
+				break
+			}
+		*/
+		if temperatureItem.SortKey == "zzzzzzzzzzzz" {
 			break
 		}
 
-		minItem := minObservation(pressureItem, relativeHumidityItem, temperatureItem, windDirectionItem, windSpeedItem, precipitableWaterItem)
+		minItem := temperatureItem // minObservation(pressureItem, relativeHumidityItem, temperatureItem, windDirectionItem, windSpeedItem, precipitableWaterItem)
 		station := sensorsTable[minItem.ID]
 
 		currentObs := types.Observation{
@@ -239,55 +246,56 @@ func mergeObservations(dataPath string, domain types.Domain, pressure, relativeH
 				WindspeedAvg: types.NaN(),
 			},
 		}
-
-		if relativeHumidityItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(relativeHumidityItem.At) {
-			currentObs.HumidityAvg = relativeHumidityItem.SensorValue()
-			relativeHumidityIdx++
-		}
-
+		/*
+			if relativeHumidityItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(relativeHumidityItem.At) {
+				currentObs.HumidityAvg = relativeHumidityItem.SensorValue()
+				relativeHumidityIdx++
+			}
+		*/
 		if temperatureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(temperatureItem.At) {
 			currentObs.Metric.TempAvg = temperatureItem.SensorValue()
 			temperatureIdx++
 		}
-
-		if windDirectionItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windDirectionItem.At) {
-			currentObs.WinddirAvg = windDirectionItem.SensorValue()
-			windDirectionIdx++
-		}
-
-		if windSpeedItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
-
-			var value types.Value
-
-			wsSensor := sensorsTable[windSpeedItem.ID]
-
-			if wsSensor.MU == "Km/h" {
-				// convert into m/s
-				value = 0.277778 * windSpeedItem.SensorValue()
-			} else if wsSensor.MU == "m/s" {
-				value = windSpeedItem.SensorValue()
-			} else {
-				return nil, fmt.Errorf("unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.MU)
+		/*
+			if windDirectionItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windDirectionItem.At) {
+				currentObs.WinddirAvg = windDirectionItem.SensorValue()
+				windDirectionIdx++
 			}
 
-			currentObs.Metric.WindspeedAvg = value
+			if windSpeedItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(windSpeedItem.At) {
 
-			windSpeedIdx++
+				var value types.Value
 
-		}
+				wsSensor := sensorsTable[windSpeedItem.ID]
 
-		if precipitableWaterItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(precipitableWaterItem.At) {
-			currentObs.Metric.PrecipTotal = precipitableWaterItem.SensorValue()
-			precipitableWaterIdx++
-		}
+				if wsSensor.MU == "Km/h" {
+					// convert into m/s
+					value = 0.277778 * windSpeedItem.SensorValue()
+				} else if wsSensor.MU == "m/s" {
+					value = windSpeedItem.SensorValue()
+				} else {
+					return nil, fmt.Errorf("unknown measure for wind speed in sensor %s: %s", windSpeedItem.ID, wsSensor.MU)
+				}
 
-		if pressureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(pressureItem.At) {
-			currentObs.Metric.Pressure = pressureItem.SensorValue()
-			pressureIdx++
-		} else {
+				currentObs.Metric.WindspeedAvg = value
 
-			currentObs.Metric.Pressure = standardAtmosphere(station.Elevation)
-		}
+				windSpeedIdx++
+
+			}
+
+			if precipitableWaterItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(precipitableWaterItem.At) {
+				currentObs.Metric.PrecipTotal = precipitableWaterItem.SensorValue()
+				precipitableWaterIdx++
+			}
+
+			if pressureItem.SortKey == currentObs.SortKey() && currentObs.ObsTimeUtc.Equal(pressureItem.At) {
+				currentObs.Metric.Pressure = pressureItem.SensorValue()
+				pressureIdx++
+			} else {
+
+				currentObs.Metric.Pressure = standardAtmosphere(station.Elevation)
+			}
+		*/
 
 		/*
 			// formula for dewpoint calculation must be applied with
@@ -300,7 +308,7 @@ func mergeObservations(dataPath string, domain types.Domain, pressure, relativeH
 		currentObs.Metric.TempAvg += 273.15
 
 		// convert pression from hPa to Pa
-		currentObs.Metric.Pressure *= 100
+		//currentObs.Metric.Pressure *= 100
 
 		results = append(results, currentObs)
 
@@ -309,6 +317,7 @@ func mergeObservations(dataPath string, domain types.Domain, pressure, relativeH
 	return results, nil
 }
 
+/*
 type standardPressure struct {
 	altMin, altMax           float64
 	pressureMin, pressureMax float64
@@ -338,7 +347,7 @@ func standardAtmosphere(elevation float64) types.Value {
 
 	return types.Value(result / 100)
 }
-
+*/
 type sensorData struct {
 	SensorID string
 	Timeline []string
@@ -352,6 +361,7 @@ type sensorAnag struct {
 	Lng, Lat, Elevation float64
 }
 
+/*
 func observationIsLess(this, that types.Result) bool {
 	if that.SortKey == "zzzzzzzzzzzz" {
 		return true
@@ -374,7 +384,7 @@ func minObservation(results ...types.Result) types.Result {
 	}
 	return min
 }
-
+*/
 func openSensorsMap(dataPath string, domain types.Domain, sensorClass string) (map[string]sensorAnag, error) {
 	sensorsTable := map[string]sensorAnag{}
 	//fmt.Println("openSensorsMap", sensorClass, domain)
@@ -422,37 +432,37 @@ func openCompleteSensorsMap(dataPath string, domain types.Domain) (map[string]se
 	sensorsTable := map[string]sensorAnag{}
 
 	//fmt.Println("openCompleteSensorsMap", domain)
-
-	err := fillSensorsMap(dataPath, domain, "IGROMETRO", sensorsTable)
+	/*
+		err := fillSensorsMap(dataPath, domain, "IGROMETRO", sensorsTable)
+		if err != nil {
+			return nil, err
+		}
+	*/
+	err := fillSensorsMap(dataPath, domain, "TERMOMETRO", sensorsTable)
 	if err != nil {
 		return nil, err
 	}
+	/*
+		err = fillSensorsMap(dataPath, domain, "DIREZIONEVENTO", sensorsTable)
+		if err != nil {
+			return nil, err
+		}
 
-	err = fillSensorsMap(dataPath, domain, "TERMOMETRO", sensorsTable)
-	if err != nil {
-		return nil, err
-	}
+		err = fillSensorsMap(dataPath, domain, "ANEMOMETRO", sensorsTable)
+		if err != nil {
+			return nil, err
+		}
 
-	err = fillSensorsMap(dataPath, domain, "DIREZIONEVENTO", sensorsTable)
-	if err != nil {
-		return nil, err
-	}
+		err = fillSensorsMap(dataPath, domain, "PLUVIOMETRO", sensorsTable)
+		if err != nil {
+			return nil, err
+		}
 
-	err = fillSensorsMap(dataPath, domain, "ANEMOMETRO", sensorsTable)
-	if err != nil {
-		return nil, err
-	}
-
-	err = fillSensorsMap(dataPath, domain, "PLUVIOMETRO", sensorsTable)
-	if err != nil {
-		return nil, err
-	}
-
-	err = fillSensorsMap(dataPath, domain, "BAROMETRO", sensorsTable)
-	if err != nil {
-		return nil, err
-	}
-
+		err = fillSensorsMap(dataPath, domain, "BAROMETRO", sensorsTable)
+		if err != nil {
+			return nil, err
+		}
+	*/
 	return sensorsTable, nil
 }
 

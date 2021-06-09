@@ -1,4 +1,4 @@
-// This module cotains an `ObsReader` interface
+// Package obsreader contains an `ObsReader` interface
 // for types that can read list of types.Observation.
 //
 // It also contains three implementations of
