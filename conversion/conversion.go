@@ -1,4 +1,4 @@
-// This module implements conversion of a types.Observation into
+// Package conversion  implements conversion of a types.Observation into
 // a string of three lines.
 // Text is formatted according to WRF ob.ascii text format,
 // which is described by this FORTRAN specification:
