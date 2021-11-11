@@ -152,8 +152,8 @@ func ToWRFASCII(obs types.Observation) string {
 			dataQCError(num( /*obs.Metric.WindspeedAvg*/ types.NaN(), 12.3), 1.0) +
 			dataQCError(num( /*obs.WinddirAvg*/ types.NaN(), 12.3), 3.0) +
 			space(11) +
-			dataQCError(num(types.Value(obs.Elevation), 12.3), 6.00) +
-			dataQCError(num(obs.Metric.TempAvg, 12.3), 0.3) +
+			dataQCError(num(types.Value(obs.Elevation), 12.3), 100.00) +
+			dataQCError(num(obs.Metric.TempAvg, 12.3), 1) +
 			dataQCError(num( /*obs.Metric.DewptAvg*/ types.NaN(), 12.3), 1.0) +
 			space(11) +
 			dataQCError(num( /*obs.HumidityAvg*/ types.NaN(), 12.3), 2)
